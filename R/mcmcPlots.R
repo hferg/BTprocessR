@@ -9,6 +9,7 @@
 #' @param ... Additional arguments passed to loadPosterior
 #' @keywords mcmc diagnostic autocorrelation trace running mean density
 #' @name mcmcPlots
+#' @importFrom ggplot2 autoplot
 #' @export
 #' @examples
 #' paramDiagnostic("cool-data.log", "Lh")

@@ -1,2 +1,3 @@
-^.*\.Rproj$
-^\.Rproj\.user$
+^.*\.Rproj$ #Rstudio project file
+^\.Rproj\.user$ #User temporary files
+^\testdata #Data for testing only at the moment - too big to include for now.
