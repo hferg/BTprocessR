@@ -21,6 +21,8 @@
 
 summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = TRUE) {
 
+  pbapply::pboptions(type = "timer", style = 3, char = "*")
+
   if (class(reftree) != "phylo") {
     reftree <- ape::read.nexus(reftree)
   }
@@ -30,6 +32,9 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = T
   if (class(trees) == "multiPhylo") {
     trees <- trees
   } else {
+    if (verbose) {
+      print("Reading posterior trees...")
+    }
     trees <- ape::read.nexus(trees)
   }
   
@@ -74,15 +79,15 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = T
                         mode_tree = modetree)
   class(summarytrees) <- c("trees_summary", "multiPhylo")
 
-  bls <- tibble(original_bls = reftree$edge.length,
-                    mean_bls = meanbl,
-                    median_bls = medianbl,
-                    mode_bls = modebl,
-                    range_bls = rangebl,
-                    sd_bls = sdbl)
+  bls <- tibble(original_bl = reftree$edge.length,
+                    mean_bl = meanbl,
+                    median_bl = medianbl,
+                    mode_bl = modebl,
+                    range_bl = rangebl,
+                    sd_bl = sdbl)
 
   res <- list(tree_summaries = summarytrees,
-              branchlengt_info = bls)
+              branchlength_info = bls)
 
   return(res)
 }
