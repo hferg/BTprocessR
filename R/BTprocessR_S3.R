@@ -66,19 +66,19 @@ print.trees_summary <- function(x) {
 #' to plot alongside the time-tree.
 #' @name plot.trees_summary
 
-plot.trees_summary <- function(x, tree = NULL, tips = FALSE) {
+plot.trees_summary <- function(x, tree = NULL, tips = FALSE, ...) {
   if (is.null(tree)) {
     nms <- names(x)
     par(mfrow = c(2, 2))
     for (i in seq_along(x)) {
-      plot(x[[i]], show.tip.label = tips, main = nms[i])
+      plot(x[[i]], show.tip.label = tips, main = nms[i], ...)
     }
   } else {
     if (!tree %in% c("mean_tree", "median_tree", "mode_tree")) {
       stop("'tree' must be either 'mean_tree', 'median_tree' or 'mode_tree'.")
     }
     par(mfrow = c(1, 2))
-    plot(x$original_tree, show.tip.label = tips, main = names(x)[1])
-    plot(x[[tree]], show.tip.label = tips, main = tree)
+    plot(x$original_tree, show.tip.label = tips, main = names(x)[1], ...)
+    plot(x[[tree]], show.tip.label = tips, main = tree, ...)
   }
 }
