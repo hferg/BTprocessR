@@ -6,7 +6,7 @@
 plot all trees in a 2x2 plot, otherwise a tree(s) can be specified
 to plot alongside the time-tree.}
 \usage{
-\method{plot}{trees_summary}(x, tree = NULL, tips = FALSE)
+\method{plot}{trees_summary}(x, tree = NULL, tips = FALSE, ...)
 }
 \description{
 A plot method for the class "trees_summary" - the default will

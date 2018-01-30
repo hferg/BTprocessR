@@ -1,11 +1,12 @@
 #' compPosts
 #'
-#' Compares histograms of one or more parameters two or more output files.
+#' Compares histograms of a single parameter from two or more output files.
 #' Generates a plot showing the distributions of the same parameter from two
 #' or more posterior samples from BayesTraits MCMC.
 #' @param logs A vector of EITHER two or more logfile names, OR a list of two 
 #' or more objects of class bt_post (see \link[BTprocessR]{loadPosterior}).
 #' @param parameter A vector containing the names of the parameter to compare.
+#' @param alpha The transparency of the histograms.
 #' @param ... Additional arguments passed to \link[BTprocessR]{loadPosterior},
 #' in the case the filenames are given for logs.
 #' @export

@@ -12,11 +12,13 @@ or more objects of class bt_post (see \link[BTprocessR]{loadPosterior}).}
 
 \item{parameter}{A vector containing the names of the parameter to compare.}
 
+\item{alpha}{The transparency of the histograms.}
+
 \item{...}{Additional arguments passed to \link[BTprocessR]{loadPosterior},
 in the case the filenames are given for logs.}
 }
 \description{
-Compares histograms of one or more parameters two or more output files.
+Compares histograms of a single parameter from two or more output files.
 Generates a plot showing the distributions of the same parameter from two
 or more posterior samples from BayesTraits MCMC.
 }
