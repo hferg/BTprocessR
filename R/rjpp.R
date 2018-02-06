@@ -47,7 +47,7 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
   
   output <- do.call(smartBind, rawtail)
   output <- output[seq.int(burnin, nrow(output), thinning), ]
-  output <- data.frame(output[2:nrow(output), ], stringsAsFactors = FALSE)
+  output <- output[2:nrow(output), ]
   subtrees <- do.call(smartBind, subtrees)
   subtrees <- data.frame(subtrees, stringsAsFactors = FALSE)
   colnames(subtrees)[c(1:2)] <- c("node", "bl")
@@ -144,6 +144,7 @@ createCountsTable <- function(reftree, tree_summary) {
 #' @param counts The counts table.
 #' @keywords internal
 #' @name scalarSearch
+
 scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
   alltypes <- allmrcas <- vector(mode = "list", length = nrow(rj_output))
 
@@ -152,20 +153,23 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
 
   # make lists for the origins of deltas etc.
   .tmp <- rep(1, nrow(rj_output))
-  node <- branch <- delta <- lambda <- kappa <- node_effects <- replicate(nrow(counts), as.numeric(paste(.tmp)), simplify = FALSE)  
-  names(node) <- names(branch) <- names(lambda) <- names(kappa) <- names(node_effects) <- counts[ , "descNode"]
-
-
-### UP TO HERE
-
+  Node <- Branch <- Delta <- Lambda <- Kappa <- Node_effects <- replicate(nrow(counts), as.numeric(paste(.tmp)), simplify = FALSE)  
+  names(Node) <- names(Branch) <- names(Delta) <- names(Lambda) <- names(Kappa) <- names(Node_effects) <- counts[ , "descNode"]
 
   print("Searching for scalars...")
-    pb <- txtProgressBar(min = 0, max = nrow(rj_output), style = 3)
+    # I want to really turn this into a function so that I can use the 
+    # same progress bar style - can it be done with apply?
+    if (verbose) {
+      pb <- pbapply::startpb(0, nrow(rj_output))
+    }
+    
     for (i in 1:nrow(rj_output)) {
+      # This step is extremely slow - I wonder if keeping rj_output as a long list,
+      # rather than smartBinding it might help.
       lastrates <- rj_output[i, !is.na(rj_output[i, ])]
       
       # If the number of columns is seven, there are no scalars applied this generation.
-      if (ncol(lastrates) == 7) {
+      if (length(lastrates) == 7) {
         nodes <- NA
         scales <- NA
         types <- NA
@@ -181,16 +185,18 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
         allmrcas[[i]] <- mrcas
 
         # Is this for-loop filling the scalar objects? Do I need to make them 
-        # within this function?
-        for (j in 1:length(mrcas)) {
+        # within this function? I wonder if this could be an after-the-fact 
+        # function...
+        for (j in seq_along(mrcas)) {
           nm <- paste0(types[j], "[[\"", as.character(mrcas[j]), "\"]]", "[", i, "]")
           eval(parse(text = paste0(nm, "<-", scales[j])))
         }
       }
-      setTxtProgressBar(pb, i)    
+      if (verbose) { 
+        pbapply::setpb(pb, i)    
+      }
     }
 
-    close(pb)
     res <- list(alltypes = alltypes,
                 allmrcas = allmrcas,
                 rates = rates,
@@ -201,6 +207,22 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
                 Kappa = Kappa,
                 Node_effects = Node_effects)
   return(res)
+}
+
+##############################################################################
+#' multiplyNodes
+#' Works out the cumulative effect of linear scalars on branches per iteration
+#' @param scales A vector of scalars for a node
+#' @param name The name of the node
+#' @param tree The time tree
+#' @param Node_effects A list, one element per node, to fill with the cumulative scalars
+#' @name multiplyNodes
+#' @keywords internal
+multiplyNodes <- function(scales, name, tree, Node_effects) {
+  # get descendents
+  descs <- c(getDescs(tree, name), as.numeric(name))
+  .tmp <- lapply(Node_effects[as.character(descs)], function(x) x * scales)
+  return(.tmp)
 }
 
 ##############################################################################
@@ -219,7 +241,7 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
 
 rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
    ratestable = TRUE, verbose = TRUE) {
-
+profvis({
   pbapply::pboptions(type = "timer", style = 3, char = "*")
 
   if (class(tree) == "phylo") {
@@ -374,6 +396,10 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   # Now just remove anything that is irrelevant (i.e. all values == 1) and then work out
   # what to return.
 
+  # The big table 100% needs to be a tibble, and so do each of the per-iteration
+  # scalar origins. With that in mind, I think the whole thing needs to have a class
+  # and a custom print method - it just makes the most sense.
+
   counts <- counts[ , apply(counts, 2, function(x) all(x != 1))]
   counts <- counts[ , apply(counts, 2, function(x) all(x != 0))]
 
@@ -419,7 +445,7 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   }
 
   res <- c(res, list(origins = origins))
-
+})
   return(res)
 }
 
