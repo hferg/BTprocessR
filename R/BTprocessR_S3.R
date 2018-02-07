@@ -1,7 +1,7 @@
 #' A print method for class bt_post
 #' Displays some descriptive info about the posterior in a table
 #'
-#' @name print.bt_post
+#' @export
 
 print.bt_post <- function(x) {
   z <- x
@@ -15,7 +15,7 @@ print.bt_post <- function(x) {
   st[ , 3] <- round(apply(x[, params], 2, median), 3)
   st[ , 4] <- round(apply(x[, params], 2, modeStat), 3)
   st[ , 5] <- round(apply(x[, params], 2, sd), 3)
-  cat("Posterior of ", nrow(x), " iterations\n\n")
+  cat("Posterior of ", nrow(x), " samples\n\n")
   print(data.frame(st))
   cat("\n")
   print(z)

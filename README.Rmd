@@ -18,8 +18,14 @@ BTprocessR is an R package that provides a set of tools to help with the analysi
 
 # Loading, summarising and plotting posteriors
 
+A log file containing an MCMC posterior (by default BayesTraits appends these files with .Log.txt) can be parsed with the function loadPosterior. This function returns a tibble with each sample taken during the MCMC chain, one per row. Printing this object returns some simple summary statistics for each parameter.
+
 ```{r}
+library(BTprocessR)
+
 post <- loadPosterior(system.file("extdata", "marsupials_brownian.txt.Log.txt", package = "BTprocessR"))
+
+print(post)
 ```
 
 

@@ -6,7 +6,7 @@
 Plots a histogram of all, or a specified number of, parameters
 from the posterior.}
 \usage{
-\method{autoplot}{bt_post}(posterior, parameters = NULL, col = NULL,
+\method{autplot}{bt_post}(posterior, parameters = NULL, col = NULL,
   pal = "D")
 }
 \arguments{
