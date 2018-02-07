@@ -3,8 +3,8 @@
 #' @name modeStat
 #' @keywords internal
 
-modeStat <- function(x, log = FALSE) 
-{  
+modeStat <- function(x, log = FALSE)
+{
   if (length(x) < 2) {
     return("NA")
   }
@@ -25,7 +25,7 @@ modeStat <- function(x, log = FALSE)
 }
 
 #' ggHist
-#' 
+#'
 #' A function to plot a nice histogram - one that uses ggplot2
 #' but has sensible break behaviour in R. Produces a single
 #' histogram but is mostly called internally for things like
@@ -58,7 +58,7 @@ ggTrace <- function(posterior, param, title){
   col <- viridis::viridis(4)[2]
   d <- data.frame(Iteration = c(1:length(d)), p = d)
   z <- ggplot2::ggplot(d, ggplot2::aes(x = Iteration, y = p)) +
-    ggplot2::geom_line(colour = col) + 
+    ggplot2::geom_line(colour = col) +
     ggplot2::theme_minimal(base_family = "Helvetica") +
     ggplot2::ggtitle(title)
   return(z)
@@ -101,7 +101,7 @@ ggRunmean <- function(posterior, param, title, window.size = 10) {
   d <- posterior[ , colnames(posterior) == param]
   d <- data.frame(d)[, 1]
   windows <- seq.int(window.size, length(d), window.size)
-  
+
   if (windows[length(windows)] != length(d)) {
     windows <- c(windows, length(d))
   }
@@ -112,16 +112,16 @@ ggRunmean <- function(posterior, param, title, window.size = 10) {
   }
 
   col <- viridis::viridis(4)[4]
-  z <- ggplot2::ggplot(data.frame(Window = c(1:length(windows)), mean = means), 
+  z <- ggplot2::ggplot(data.frame(Window = c(1:length(windows)), mean = means),
         ggplot2::aes(x = Window, y = mean)) +
     ggplot2::geom_point(color = "black", fill = col, pch = 21) +
-    ggplot2::geom_smooth(method = "lm", formula = y ~ x) + 
+    ggplot2::geom_smooth(method = "lm", formula = y ~ x) +
     ggplot2::theme_minimal(base_family = "Helvetica") +
     ggplot2::ggtitle(title)
   return(z)
 }
 
-#' smartBind 
+#' smartBind
 #'
 #' A function that will rbind vectors of different lengths and return a matrix, provided each vector element is named.
 #' @param A bunch of vectors.
@@ -132,10 +132,10 @@ smartBind <- function (...) {
   # from GSee http://stackoverflow.com/questions/17308551/do-callrbind-list-for-uneven-number-of-column
   dargs <- list(...)
 
-  if (!all(vapply(dargs, is.vector, TRUE))) 
+  if (!all(vapply(dargs, is.vector, TRUE)))
       stop("all inputs must be vectors")
 
-  if (!all(vapply(dargs, function(x) !is.null(names(x)), TRUE))) 
+  if (!all(vapply(dargs, function(x) !is.null(names(x)), TRUE)))
       stop("all input vectors must be named.")
 
   all.names <- unique(names(unlist(dargs)))
