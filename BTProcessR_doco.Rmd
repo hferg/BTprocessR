@@ -1,0 +1,35 @@
+---
+title: "BTProcessR Documentation"
+author: "H. Ferguson-Gow"
+date: "7 February 2018"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# BTProcessR Documentation
+
+<!-- ## Contents -->
+<!-- 1. Introduction -->
+<!-- 2. Loading, visualising and assessing posteriors -->
+<!-- 3. Loading and visualising posterior samples of trees -->
+<!-- 4. Post-processing rate-variable and reverse-jump local transformation models -->
+<!-- + Postprocessing *.Varrates.txt files -->
+<!-- + Finding rate shifts -->
+<!-- + Visualising rate shifts  -->
+
+
+
+```{r cars}
+summary(cars)
+```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
