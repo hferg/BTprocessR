@@ -3,7 +3,7 @@ title: "BTProcessR Documentation"
 author: "H. Ferguson-Gow"
 date: "7 February 2018"
 output:
-  html_document:
+  github_document:
     toc: true
     toc_depth: 2
 ---
