@@ -46,6 +46,14 @@ print(post)
     ## 10   1010000  -142    1.00    2.53   0.0131 
     ## # ... with 4,990 more rows
 
+It is also possible to plot histograms of each of the parameters present in the posterior.
+
+``` r
+plot(post)
+```
+
+![](README_files/figure-markdown_github/plotPosterior-1.png)
+
 <!-- ## Contents -->
 <!-- 1. Introduction -->
 <!-- 2. Loading, visualising and assessing posteriors -->

@@ -1,7 +1,7 @@
 #' A print method for class bt_post
 #' Displays some descriptive info about the posterior in a table
 #'
-#' @export
+#' @name print.bt_post
 
 print.bt_post <- function(x) {
   z <- x
@@ -66,6 +66,7 @@ autoplot.bt_post <- function(posterior, parameters = NULL, col = NULL,
 
 #' A plot method for the class "bt_post" that invokes the
 #' autoplot method.
+#' @name plot.bt_post
 
 plot.bt_post <- function(x, ...) {
   autoplot(x, ...)
