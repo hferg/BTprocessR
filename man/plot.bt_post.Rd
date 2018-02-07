@@ -2,12 +2,12 @@
 % Please edit documentation in R/BTprocessR_S3.R
 \name{plot.bt_post}
 \alias{plot.bt_post}
-\title{A plot method for the class "bt_post" that invokes the 
+\title{A plot method for the class "bt_post" that invokes the
 autoplot method.}
 \usage{
 \method{plot}{bt_post}(x, ...)
 }
 \description{
-A plot method for the class "bt_post" that invokes the 
+A plot method for the class "bt_post" that invokes the
 autoplot method.
 }

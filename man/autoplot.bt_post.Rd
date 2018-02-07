@@ -13,18 +13,18 @@ from the posterior.}
 \item{posterior}{An object of class "bt_post", returned from
 loadPosterior.}
 
-\item{col}{The colour of the bars in the histogram, or 
-a vector of colours (for multiple plots). If absent the 
+\item{col}{The colour of the bars in the histogram, or
+a vector of colours (for multiple plots). If absent the
 viridis colour scale is used.}
 
 \item{pal}{If using the viridis pallettes (i.e. no user-specified
 colours) then this determines the viridis palletter used.
-See \link[viridis]{scale_color_viridis}. 
-Four options are available: "magma" (or "A"), "inferno" (or "B"), 
+See \link[viridis]{scale_color_viridis}.
+Four options are available: "magma" (or "A"), "inferno" (or "B"),
 "plasma" (or "C"), and "viridis" (or "D", the default option).}
 
-\item{parameter}{The parameter, or vector of parameter names, to plot. 
-Must match column names of posterior. If NULL then all parameters 
+\item{parameter}{The parameter, or vector of parameter names, to plot.
+Must match column names of posterior. If NULL then all parameters
 will be plotted.}
 }
 \description{
