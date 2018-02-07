@@ -1,26 +1,3 @@
-#' A print method for class bt_post
-#' Displays some descriptive info about the posterior in a table
-#'
-#' @name print.bt_post
-
-print.bt_post <- function(x) {
-  z <- x
-  class(z) <- class(x)[-1]
-  params <- colnames(x)
-  params <- params[!params %in% c("Iteration", "Tree.No")]
-  st <- matrix(nrow = length(params), ncol = 5)
-  colnames(st) <- c("Parameter", "Median", "Mean", "Mode", "SD")
-  st[ , 1] <- params
-  st[ , 2] <- round(apply(x[, params], 2, mean), 3)
-  st[ , 3] <- round(apply(x[, params], 2, median), 3)
-  st[ , 4] <- round(apply(x[, params], 2, modeStat), 3)
-  st[ , 5] <- round(apply(x[, params], 2, sd), 3)
-  cat("Posterior of ", nrow(x), " samples\n\n")
-  print(data.frame(st))
-  cat("\n")
-  print(z)
-}
-
 #' An autoplot (ggplot2) method for objects of class "bt_post".
 #' Plots a histogram of all, or a specified number of, parameters
 #' from the posterior.
@@ -38,10 +15,12 @@ print.bt_post <- function(x) {
 #' See \link[viridis]{scale_color_viridis}.
 #' Four options are available: "magma" (or "A"), "inferno" (or "B"),
 #' "plasma" (or "C"), and "viridis" (or "D", the default option).
+#' @method autoplot bt_post
 #' @name autoplot.bt_post
+#' @export
 
 autoplot.bt_post <- function(posterior, parameters = NULL, col = NULL,
-    pal = "D") {
+                             pal = "D") {
   d <- posterior[, !colnames(posterior) %in% c("Iteration", "Harmonic.Mean", "Tree.No")]
   if (!is.null(parameters)) {
     d <- d[, colnames(d) %in% parameters]
@@ -64,17 +43,44 @@ autoplot.bt_post <- function(posterior, parameters = NULL, col = NULL,
   p
 }
 
+#' A print method for class bt_post
+#' Displays some descriptive info about the posterior in a table
+#' @method print bt_post
+#' @export
+
+print.bt_post <- function(x) {
+  z <- x
+  class(z) <- class(x)[-1]
+  params <- colnames(x)
+  params <- params[!params %in% c("Iteration", "Tree.No")]
+  st <- matrix(nrow = length(params), ncol = 5)
+  colnames(st) <- c("Parameter", "Median", "Mean", "Mode", "SD")
+  st[ , 1] <- params
+  st[ , 2] <- round(apply(x[, params], 2, mean), 3)
+  st[ , 3] <- round(apply(x[, params], 2, median), 3)
+  st[ , 4] <- round(apply(x[, params], 2, modeStat), 3)
+  st[ , 5] <- round(apply(x[, params], 2, sd), 3)
+  cat("Posterior of ", nrow(x), " samples\n\n")
+  print(data.frame(st))
+  cat("\n")
+  print(z)
+}
+
+
+
 #' A plot method for the class "bt_post" that invokes the
 #' autoplot method.
-#' @name plot.bt_post
+#' @method plot bt_post
+#' @export
 
 plot.bt_post <- function(x, ...) {
   autoplot(x, ...)
 }
 
 #' Print function for the S3 class trees_summary
-#'
+#' @method print trees_summary
 #' @name print.trees_summary
+#' @export
 
 print.trees_summary <- function(x) {
   n <- length(x)
@@ -88,6 +94,8 @@ print.trees_summary <- function(x) {
 #' A plot method for the class "trees_summary" - the default will
 #' plot all trees in a 2x2 plot, otherwise a tree(s) can be specified
 #' to plot alongside the time-tree.
+#' @method plot trees_summary
+#' @export
 #' @name plot.trees_summary
 
 plot.trees_summary <- function(x, tree = NULL, tips = FALSE, ...) {

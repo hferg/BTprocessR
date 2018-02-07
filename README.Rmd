@@ -43,12 +43,3 @@ plot(post)
 <!-- + Postprocessing *.Varrates.txt files -->
 <!-- + Finding rate shifts -->
 <!-- + Visualising rate shifts  -->
-
-```{r cars}
-summary(cars)
-```
-
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
