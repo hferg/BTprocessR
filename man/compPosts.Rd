@@ -7,7 +7,7 @@
 compPosts(logs, parameter, alpha = 0.7, ...)
 }
 \arguments{
-\item{logs}{A vector of EITHER two or more logfile names, OR a list of two 
+\item{logs}{A vector of two or more logfile names, OR a list of two 
 or more objects of class bt_post (see \link[BTprocessR]{loadPosterior}).}
 
 \item{parameter}{A vector containing the names of the parameter to compare.}

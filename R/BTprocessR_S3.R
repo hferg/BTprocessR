@@ -31,7 +31,7 @@ autoplot.bt_post <- function(posterior, parameters = NULL, col = NULL,
     col <- viridis::viridis(length(parameters))
   }
 
-  d <- reshape2::melt(d)
+  d <- reshape2::melt(d, id.vars = NULL)
   p <- ggplot2::ggplot(d, ggplot2::aes(value, fill = variable)) +
     ggplot2::geom_histogram() +
     ggplot2::theme_minimal(base_family = "Helvetica") +

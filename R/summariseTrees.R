@@ -74,7 +74,7 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = T
   modetree$edge.length <- modebl
 
   summarytrees <- list(original_tree = reftree,
-                        meant_ree = meantree,
+                        mean_tree = meantree,
                         median_tree = mediantree,
                         mode_tree = modetree)
   class(summarytrees) <- c("trees_summary", "multiPhylo")
@@ -88,6 +88,6 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = T
 
   res <- list(tree_summaries = summarytrees,
               branchlength_info = bls)
-
+  
   return(res)
 }

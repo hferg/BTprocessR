@@ -1,7 +1,5 @@
 ---
 title: "BTprocessR"
-author: "H. Ferguson-Gow"
-date: "7 February 2018"
 output:
   github_document:
     toc: true
@@ -16,9 +14,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 BTprocessR is an R package that provides a set of tools to help with the analysis of the output of the various MCMC models in [BayesTraits](http://www.evolution.rdg.ac.uk/BayesTraitsV3.0.1/BayesTraitsV3.0.1.html). The package includes functions for visualising the posterior distribtuion of the estimated parameters, summarising and plotting posterior distributions of phylogenies (resulting from rate-variable and/or reversible jump local transformation (RJLT) models, summarising inferred rate scalars for each node and branch in a tree, and identifying and plotting rate shifts. Currently the package only deals with the output of analyses of continuous traits, with functions for the various discrete trait analyses coming soon.
 
+The package includes the output of three analyses of marsupuial body size - a brownian motion analysis, a variable rates analysis and an RJLT analysis using the delta transformation. In way of a disclaimer please note that in order to keep the package size small each of these MCMC chains collected only 500 samples, which may be insufficient to ensure proper convergence. The tree and data that these analyses used are also included should one wish to repeat these analyses with a longer chain or higher sampling rate.
+
+```{r data}
+library(BTprocessR)
+data(marsupial_data)
+```
+
 # Loading, summarising and plotting posteriors
 
-A log file containing an MCMC posterior (by default BayesTraits appends these files with .Log.txt) can be parsed with the function loadPosterior. This function returns a tibble with each sample taken during the MCMC chain, one per row. Printing this object returns some simple summary statistics for each parameter.
+A log file containing an MCMC posterior (by default BayesTraits appends these files with .Log.txt) can be parsed with the function loadPosterior. This function returns a [tibble](https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html) with each sample taken during the MCMC chain, one per row. Printing this object returns some simple summary statistics for each parameter.
 
 ```{r loadPosterior}
 library(BTprocessR)
@@ -28,7 +33,7 @@ post <- loadPosterior(system.file("extdata", "marsupials_brownian.txt.Log.txt", 
 print(post)
 ```
 
-It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s).
+It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s). The resulting plots are a histogram of the parameter samples, a trace plot, an autocorrelation plot, and a plot of the sliding mean of the samples with a window size of ten and a regression line (standard linear model).
 
 ```{r plotPosterior}
 plot(post)
@@ -38,6 +43,51 @@ mcmcPlots(post)
 mcmcPlots(post, parameters = "Lh")
 
 mcmcPlots(post, parameters = c("Lh", "Sigma.2.1"))
+```
+
+# Model comparison
+
+## Visually comparing posteriors
+BTprocessR contains functions that allow the quick comparison of like parameters over more than one posterior for the visual comparison of models. The legend on the resulting plot numbers the logfiles in the order that they were given to the function.
+
+```{r comparePosteriors}
+post_brownian <- loadPosterior(system.file("extdata", "marsupials_brownian.txt.Log.txt", package = "BTprocessR"))
+
+post_vrates <- loadPosterior(system.file("extdata", "marsupials_vrates.txt.Log.txt", package = "BTprocessR"))
+
+compPosts(logs = list(post_brownian, post_vrates),
+  parameter = "Lh")
+
+# Can take any number of posteriors.
+post_vdelta <- loadPosterior(system.file("extdata", "marsupials_variabledelta.txt.Log.txt", package = "BTprocessR"))
+
+compPosts(logs = list(post_brownian, post_vrates, post_vdelta),
+  parameter = "Lh")
+```
+
+## Comparing marginal likelihoods
+
+
+# Summarising and plotting posterior samples of trees
+
+One of the outputs of the various reversible jump (RJ) models in BayesTraits is a collection of transformed trees sampled during the MCMC process. By default BayesTraits appendeds these files with ".Output.trees". BTprocessR can read these posteriors in, summarise them, and plot the original tree alongisde the mean, median and modal trees from the posterior to visualise the difference.
+
+The original tree (generally the time tree) is provided to enable a comparison between the posterior of trees and the original branch lengths.
+
+The function returns a list of two elements - the first is a multiPhylo object containing the original tree, and trees transformed with the mean, median and mode branch lengths and the second element is a tibble containing the per-branch information.
+
+```{r treePosteriors}
+data(marsupial_trees)
+
+post_trees <- summariseTrees(reftree = marsupial_trees$timetree,
+                              trees = marsupial_trees$vrates_trees)
+
+names(post_trees)
+print(post_trees)
+
+plot(post_trees$tree_summaries)
+# Compare specific tree to time tree.
+plot(post_trees$tree_summaries, tree = "median_tree")
 ```
 
 
