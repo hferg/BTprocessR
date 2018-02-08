@@ -61,34 +61,27 @@ print(post)
 # This information can also be assigned to an object for one or more parameters.
 
 post_info <- getPostStats(post, parameter = "Lh")
-```
-
-```
-## Error in getPostStats(post, parameter = "Lh"): object 'posterior' not found
-```
-
-```r
 post_info
 ```
 
 ```
-## Error in eval(expr, envir, enclos): object 'post_info' not found
+## # A tibble: 1 x 5
+##   parameter  mean median  mode    sd
+##   <chr>     <dbl>  <dbl> <dbl> <dbl>
+## 1 Lh         -140   -140  -139  1.02
 ```
 
 ```r
 post_info <- getPostStats(post, parameter = c("Lh", "Sigma.2.1"))
-```
-
-```
-## Error in getPostStats(post, parameter = c("Lh", "Sigma.2.1")): object 'posterior' not found
-```
-
-```r
 post_info
 ```
 
 ```
-## Error in eval(expr, envir, enclos): object 'post_info' not found
+## # A tibble: 2 x 5
+##   parameter      mean    median      mode      sd
+##   <chr>         <dbl>     <dbl>     <dbl>   <dbl>
+## 1 Lh        -140      -140      -139      1.02   
+## 2 Sigma.2.1    0.0111    0.0110    0.0110 0.00100
 ```
 
 It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s). The resulting plots are a histogram of the parameter samples, a trace plot, an autocorrelation plot, and a plot of the sliding mean of the samples with a window size of ten and a regression line (standard linear model).

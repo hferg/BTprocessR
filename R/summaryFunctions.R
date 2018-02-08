@@ -19,11 +19,6 @@
 
 getPostStats <- function(logfile, parameter, ...) {
 
-  modeStat <- function(x) {
-    z <- unique(x)
-    x[which.max(tabulate(match(x, z)))]
-  }
-
   if (!"bt_post" %in% class(logfile)) {
     posterior <- loadPosterior(logfile, ...)
   } else  {
