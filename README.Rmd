@@ -78,7 +78,6 @@ BayesTraits can calculate marginal likelhoods for a model by use of the stepping
 stones <- c(system.file("extdata", "marsupials_brownian.txt.Stones.txt", package = "BTprocessR"),
   system.file("extdata", "marsupials_vrates.txt.Stones.txt", package = "BTprocessR"),
   system.file("extdata", "marsupials_variabledelta.txt.Stones.txt", package = "BTprocessR"))
-stones 
 
 marginal_likelihoods <- getStones(stones, labels = c("Brownian motion", "Var. rates", "RJ delta"))
 
