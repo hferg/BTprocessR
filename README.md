@@ -57,6 +57,40 @@ print(post)
 ## # ... with 490 more rows
 ```
 
+```r
+# This information can also be assigned to an object for one or more parameters.
+
+post_info <- getPostStats(post, parameter = "Lh")
+```
+
+```
+## Error in getPostStats(post, parameter = "Lh"): object 'posterior' not found
+```
+
+```r
+post_info
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'post_info' not found
+```
+
+```r
+post_info <- getPostStats(post, parameter = c("Lh", "Sigma.2.1"))
+```
+
+```
+## Error in getPostStats(post, parameter = c("Lh", "Sigma.2.1")): object 'posterior' not found
+```
+
+```r
+post_info
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'post_info' not found
+```
+
 It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s). The resulting plots are a histogram of the parameter samples, a trace plot, an autocorrelation plot, and a plot of the sliding mean of the samples with a window size of ten and a regression line (standard linear model).
 
 
@@ -99,8 +133,7 @@ post_brownian <- loadPosterior(system.file("extdata", "marsupials_brownian.txt.L
 
 post_vrates <- loadPosterior(system.file("extdata", "marsupials_vrates.txt.Log.txt", package = "BTprocessR"))
 
-compPosts(logs = list(post_brownian, post_vrates),
-  parameter = "Lh")
+compPosts(logs = list(post_brownian, post_vrates),  parameter = "Lh")
 ```
 
 ![plot of chunk comparePosteriors](figure/comparePosteriors-1.png)
@@ -109,14 +142,49 @@ compPosts(logs = list(post_brownian, post_vrates),
 # Can take any number of posteriors.
 post_vdelta <- loadPosterior(system.file("extdata", "marsupials_variabledelta.txt.Log.txt", package = "BTprocessR"))
 
-compPosts(logs = list(post_brownian, post_vrates, post_vdelta),
-  parameter = "Lh")
+compPosts(logs = list(post_brownian, post_vrates, post_vdelta),  parameter = "Lh")
 ```
 
 ![plot of chunk comparePosteriors](figure/comparePosteriors-2.png)
 
 ## Comparing marginal likelihoods
 
+BayesTraits can calculate marginal likelhoods for a model by use of the stepping stone sampler. This is the recommended way to calculate marginal likelihoods for RJ models, and returns a file appended with .Stones.txt. BTprocessR can retrieve the marginal likelihoods from these files and return a table of marginal likelihoods as estimated by the stepping stone sampler. Plotting the resulting object will create a bayes factor plot (row vs column). It is worth providing labels for each model, especially if plotting or using a long filepath to the stones files otherwise the plot and/or table will be unwieldy.
+
+
+```r
+stones <- c(system.file("extdata", "marsupials_brownian.txt.Stones.txt", package = "BTprocessR"),
+  system.file("extdata", "marsupials_vrates.txt.Stones.txt", package = "BTprocessR"),
+  system.file("extdata", "marsupials_variabledelta.txt.Stones.txt", package = "BTprocessR"))
+stones 
+```
+
+```
+## [1] "/home/hfg/R/x86_64-pc-linux-gnu-library/3.4/BTprocessR/extdata/marsupials_brownian.txt.Stones.txt"     
+## [2] "/home/hfg/R/x86_64-pc-linux-gnu-library/3.4/BTprocessR/extdata/marsupials_vrates.txt.Stones.txt"       
+## [3] "/home/hfg/R/x86_64-pc-linux-gnu-library/3.4/BTprocessR/extdata/marsupials_variabledelta.txt.Stones.txt"
+```
+
+```r
+marginal_likelihoods <- getStones(stones, labels = c("Brownian motion", "Var. rates", "RJ delta"))
+
+marginal_likelihoods
+```
+
+```
+## # A tibble: 3 x 2
+##   logfile         marginalLh
+##   <chr>                <dbl>
+## 1 Brownian motion       -155
+## 2 Var. rates            -120
+## 3 RJ delta              -120
+```
+
+```r
+plot(marginal_likelihoods)
+```
+
+![plot of chunk marginalLikelihoods](figure/marginalLikelihoods-1.png)
 
 # Summarising and plotting posterior samples of trees
 
@@ -187,6 +255,9 @@ plot(post_trees$tree_summaries, tree = "median_tree")
 ```
 
 ![plot of chunk treePosteriors](figure/treePosteriors-2.png)
+
+# Summarising and interpreting RJ output
+
 
 
 <!-- ## Contents -->

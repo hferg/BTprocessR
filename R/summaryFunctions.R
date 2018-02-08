@@ -26,6 +26,8 @@ getPostStats <- function(logfile, parameter, ...) {
 
   if (!"bt_post" %in% class(logfile)) {
     posterior <- loadPosterior(logfile, ...)
+  } else  {
+    posterior <- logfile
   }
 
   d <- posterior[ , colnames(posterior) %in% parameter]
@@ -41,39 +43,4 @@ getPostStats <- function(logfile, parameter, ...) {
   }
 
   return(tibble::as_tibble(res))
-}
-
-
-#' getStones
-#'
-#' Get the marginal likelihoods from from one or more stepping stones log
-#' files.
-#' @param stonesfile A vector of one or more log files from stepping stones analysis.
-#' @param order If TRUE then the resultant data.frame is ordered according to
-#' marginal likelihood.
-#' @name getStones
-#' @return A data.frame with a row per stones file, and a column with the
-#' marginal likelihoods of each model in.
-#' @export
-
-getStones <- function(stonesfile, order = TRUE) {
-  # TODO A function to count the parameters in the original model and return
-  # them as well as the marginal likelihoods (to look at improvement in
-  # marginal Lh as parameter numbers increase).
-  res <- matrix(ncol = 2, nrow = length(stonesfile))
-  colnames(res) <- c("logfile", "marginalLh")
-  res <- data.frame(res)
-  for (i in 1:length(stonesfile)) {
-    raw <- readLines(stonesfile[[i]])
-    res[i, 1] <- gsub(".txt.log.txt.Stones.txt", "", stonesfile[i])
-    res[i, 2] <- as.numeric(strsplit(raw[length(raw)], "\t")[[1]][2])
-  }
-  res <- data.frame(res)
-  res$marginalLh <- as.numeric(as.character(res$marginalLh))
-
-  if (order) {
-    res <- res[order(res$marginalLh, decreasing = TRUE), ]
-  }
-
-  return(as_tibble(res))
 }

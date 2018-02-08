@@ -75,7 +75,10 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 #'    c) If there are possible splits, can the occur here, or is it more
 #'      useful later on.
 #'    d) Is the table being built in the best way?
-#' 
+#' The species descendent from each tip 100% needs to be a seperate list
+#' and it's own element in the results - this makes for ludicrous plotting.
+#' It should also have a method that prints the names properly when called,
+#' and when a specific node is selected.
 
 createCountsTable <- function(reftree, tree_summary) {
   counts <- matrix(ncol = 53, nrow = (nrow(reftree$edge) + 1))
@@ -392,9 +395,6 @@ profvis({
   counts[ , "nDelta"] <- counts[ , "nOrgnDelta"]
   counts[ , "nKappa"] <- counts[ , "nOrgnDelta"]
   counts[ , "nLambda"] <- counts[ , "nOrgnDelta"]
-
-  # Now just remove anything that is irrelevant (i.e. all values == 1) and then work out
-  # what to return.
 
   # The big table 100% needs to be a tibble, and so do each of the per-iteration
   # scalar origins. With that in mind, I think the whole thing needs to have a class

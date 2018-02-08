@@ -66,8 +66,6 @@ print.bt_post <- function(x) {
   print(z)
 }
 
-
-
 #' A plot method for the class "bt_post" that invokes the
 #' autoplot method.
 #' @method plot bt_post
@@ -113,4 +111,48 @@ plot.trees_summary <- function(x, tree = NULL, tips = FALSE, ...) {
     plot(x$original_tree, show.tip.label = tips, main = names(x)[1], ...)
     plot(x[[tree]], show.tip.label = tips, main = tree, ...)
   }
+}
+
+#' An autoplot method for the class "bt_stones". Plots a bayes factor matrix.
+#' @method autoplot bt_stones
+#' @export
+#' @name autoplot.bt_stones
+
+autoplot.bt_stones <- function(x) {
+  d <- matrix(ncol = nrow(x), nrow = nrow(x))
+  colnames(d) <- rownames(d) <- x$logfile
+  
+  for (i in seq_len(nrow(d))) {
+    for (j in seq_len(ncol(d))) {
+      d[i, j] <- round(2 * (x$marginalLh[i] - x$marginalLh[j]), 2)
+    }
+  }
+
+  d <- reshape2::melt(d[nrow(d):1, ])
+  d$bf_cat <- cut(d$value, 
+    breaks = c(min(d$value) - 1, 0, 2, 5, 10, max(d$value)),
+    labels = c("<0", "0-2", "2-5", "5-10", ">10"))
+  d$value[d$value == 0] <- d$bf_cat[d$value == 0] <- NA
+  p <- ggplot2::ggplot(d, ggplot2::aes(x = Var2, y = Var1, fill = bf_cat)) +
+    ggplot2::geom_tile(colour = "white", size = 0.25) +
+    ggplot2::geom_text(data = d, ggplot2::aes(Var2, Var1, label = value), 
+      na.rm = TRUE) +
+    ggplot2::scale_y_discrete(expand=c(0,0))+
+    ggplot2::scale_x_discrete(expand=c(0,0), position = "top") +
+    ggplot2::scale_fill_manual(values = viridis::viridis(8)[3:7], 
+      na.value = "grey90", drop = FALSE) +
+    ggplot2::labs(x = "", y = "", fill = "Bayes factor") +
+    ggplot2::coord_fixed() +
+    ggplot2::theme_minimal(base_family = "Helvetica")
+  p
+}
+
+#' A plot method for the class "bt_stones" that invokes the
+#' autoplot method.
+#' @method plot bt_stones
+#' @export
+#' @name plot.bt_stones
+
+plot.bt_stones <- function(x) {
+  autoplot(x)
 }
