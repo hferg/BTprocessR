@@ -28,10 +28,16 @@ post <- loadPosterior(system.file("extdata", "marsupials_brownian.txt.Log.txt", 
 print(post)
 ```
 
-It is also possible to plot histograms of each of the parameters present in the posterior.
+It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s).
 
 ```{r plotPosterior}
 plot(post)
+
+mcmcPlots(post)
+
+mcmcPlots(post, parameters = "Lh")
+
+mcmcPlots(post, parameters = c("Lh", "Sigma.2.1"))
 ```
 
 
