@@ -23,23 +23,32 @@ A log file containing an MCMC posterior (by default BayesTraits appends these fi
 library(BTprocessR)
 
 post <- loadPosterior(system.file("extdata", "marsupials_brownian.txt.Log.txt", package = "BTprocessR"))
-```
 
-```
-## Warning in file(con, "r"): file("") only supports open = "w+" and open = "w
-## +b": using the former
-```
-
-```
-## Error in grep("\\bIteration\\b", raw):length(raw): argument of length 0
-```
-
-```r
 print(post)
 ```
 
 ```
-## Error in print(post): object 'post' not found
+## Posterior of  5000  samples
+## 
+##   Parameter   Median     Mean     Mode    SD
+## 1        Lh -140.082 -139.769 -139.302 1.009
+## 2   Alpha.1    2.115    2.124    2.168 0.385
+## 3 Sigma.2.1    0.011    0.011    0.011 0.001
+## 
+## # A tibble: 5,000 x 5
+##    Iteration    Lh Tree.No Alpha.1 Sigma.2.1
+##  *     <dbl> <dbl>   <dbl>   <dbl>     <dbl>
+##  1   1001000  -139    1.00    2.12   0.0107 
+##  2   1002000  -139    1.00    2.28   0.0115 
+##  3   1003000  -140    1.00    2.63   0.0104 
+##  4   1004000  -141    1.00    2.58   0.0124 
+##  5   1005000  -141    1.00    2.54   0.0126 
+##  6   1006000  -140    1.00    2.32   0.00993
+##  7   1007000  -139    1.00    2.26   0.0103 
+##  8   1008000  -139    1.00    2.18   0.0109 
+##  9   1009000  -142    1.00    1.51   0.00942
+## 10   1010000  -142    1.00    2.53   0.0131 
+## # ... with 4,990 more rows
 ```
 
 It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s).
@@ -50,32 +59,32 @@ plot(post)
 ```
 
 ```
-## Error in plot(post): object 'post' not found
+## No id variables; using all as measure variables
 ```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![plot of chunk plotPosterior](figure/plotPosterior-1.png)
 
 ```r
 mcmcPlots(post)
 ```
 
-```
-## Error in "bt_post" %in% class(logfile): object 'post' not found
-```
+![plot of chunk plotPosterior](figure/plotPosterior-2.png)
 
 ```r
 mcmcPlots(post, parameters = "Lh")
 ```
 
-```
-## Error in "bt_post" %in% class(logfile): object 'post' not found
-```
+![plot of chunk plotPosterior](figure/plotPosterior-3.png)
 
 ```r
 mcmcPlots(post, parameters = c("Lh", "Sigma.2.1"))
 ```
 
-```
-## Error in "bt_post" %in% class(logfile): object 'post' not found
-```
+![plot of chunk plotPosterior](figure/plotPosterior-4.png)
 
 
 <!-- ## Contents -->
