@@ -10,7 +10,9 @@ output:
 
 # Introduction
 
-BTprocessR is an R package that provides a set of tools to help with the analysis of the output of the various MCMC models in [BayesTraits](http://www.evolution.rdg.ac.uk/BayesTraitsV3.0.1/BayesTraitsV3.0.1.html). The package includes functions for visualising the posterior distribtuion of the estimated parameters, summarising and plotting posterior distributions of phylogenies (resulting from rate-variable and/or reversible jump local transformation (RJLT) models, summarising inferred rate scalars for each node and branch in a tree, and identifying and plotting rate shifts. Currently the package only deals with the output of analyses of continuous traits, with functions for the various discrete trait analyses coming soon.
+*NOTE* This package is still under construction. Some functions may be absent, or non-functional in their current state.
+
+BTprocessR is an R package that provides a set of tools to help with the analysis of the output of the various MCMC models in [BayesTraits](http://www.evolution.rdg.ac.uk/BayesTraitsV3.0.1/BayesTraitsV3.0.1.html). The package includes functions for visualising the posterior distribtuion of the estimated parameters, summarising and plotting posterior distributions of phylogenies (resulting from rate-variable and/or reversible jump local transformation (RJLT)) models, summarising inferred rate scalars for each node and branch in a tree, and identifying and plotting rate shifts. Currently the package only deals with the output of analyses of continuous traits, with functions for the various discrete trait analyses coming soon.
 
 The package includes the output of three analyses of marsupuial body size - a brownian motion analysis, a variable rates analysis and an RJLT analysis using the delta transformation. In way of a disclaimer please note that in order to keep the package size small each of these MCMC chains collected only 500 samples, which may be insufficient to ensure proper convergence. The tree and data that these analyses used are also included should one wish to repeat these analyses with a longer chain or higher sampling rate.
 
@@ -81,7 +83,7 @@ post_info
 ##   parameter      mean    median      mode      sd
 ##   <chr>         <dbl>     <dbl>     <dbl>   <dbl>
 ## 1 Lh        -140      -140      -139      1.02   
-## 2 Sigma.2.1    0.0111    0.0110    0.0110 0.00100
+## 2 Sigma.2.1    0.0111    0.0110    0.0111 0.00100
 ```
 
 It is also possible to plot histograms of each of the parameters present in the posterior, and to plot some simple plots to aid in the visual diagnosis of convergence for either a specific parameter, or for specific parameter(s). The resulting plots are a histogram of the parameter samples, a trace plot, an autocorrelation plot, and a plot of the sliding mean of the samples with a window size of ten and a regression line (standard linear model).
