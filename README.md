@@ -10,7 +10,7 @@ output:
 
 # Introduction
 
-*NOTE* This package is still under construction. Some functions may be absent, or non-functional in their current state.
+__NOTE__ This package is still under construction. Some functions may be absent, or non-functional in their current state.
 
 BTprocessR is an R package that provides a set of tools to help with the analysis of the output of the various MCMC models in [BayesTraits](http://www.evolution.rdg.ac.uk/BayesTraitsV3.0.1/BayesTraitsV3.0.1.html). The package includes functions for visualising the posterior distribtuion of the estimated parameters, summarising and plotting posterior distributions of phylogenies (resulting from rate-variable and/or reversible jump local transformation (RJLT)) models, summarising inferred rate scalars for each node and branch in a tree, and identifying and plotting rate shifts. Currently the package only deals with the output of analyses of continuous traits, with functions for the various discrete trait analyses coming soon.
 
