@@ -5,7 +5,8 @@
 #' is used inside plot functions and so on, but might be useful for
 #' other MCMC manipulations and so on.
 #' @param logfile The name of the logfile of the BayesTraits analysis.
-#' @return A list containing the taxa translation table, all possible subtrees a scalar can occur on, and a data frame of the rj model configuration.
+#' @return A list containing the taxa translation table, all possible subtrees 
+#' a scalar can occur on, and a data frame of the rj model configuration.
 
 loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 
@@ -82,20 +83,21 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 
 createCountsTable <- function(reftree, tree_summary) {
   counts <- matrix(ncol = 53, nrow = (nrow(reftree$edge) + 1))
-  colnames(counts) <- c("branch", "ancNode", "descNode", "nTips", "start", "end", "mid", "original_bl", 
-      "mean_bl", "median_bl", "mode_bl", "range_bl", "sd_bl",
-      "itersScaled", "itersRatescaled", "itersDelta", "itersKappa", "itersLambda", 
-      "pScaled", "pRate", "pDelta", "pKappa", "pLambda",
-      "nScalar", "nRate", "nDelta", "nKappa", "nLambda",
-      "nOrgnScalar", "nOrgnNRate", "nOrgnBRate", "nOrgnDelta", "nOrgnKappa", "nOrgnLambda",
-      "rangeRate", "lqRate", "uqRate", "meanRate", "medianRate", "modeRate",
-      "rangeDelta", "meanDelta", "medianDelta", "modeDelta",
+  colnames(counts) <- c("branch", "ancNode", "descNode", "nTips", "start", 
+      "end", "mid", "original_bl", "mean_bl", "median_bl", "mode_bl", 
+      "range_bl", "sd_bl", "itersScaled", "itersRatescaled", "itersDelta", 
+      "itersKappa", "itersLambda", "pScaled", "pRate", "pDelta", "pKappa", 
+      "pLambda", "nScalar", "nRate", "nDelta", "nKappa", "nLambda", 
+      "nOrgnScalar", "nOrgnNRate", "nOrgnBRate", "nOrgnDelta", "nOrgnKappa", 
+      "nOrgnLambda", "rangeRate", "lqRate", "uqRate", "meanRate", "medianRate", 
+      "modeRate", "rangeDelta", "meanDelta", "medianDelta", "modeDelta",
       "rangeKappa", "meanKappa", "medianKappa", "modeKappa",
       "rangeLambda", "meanLambda", "medianLambda", "modeLambda", "species")
 
   counts[ , "branch"] <- c(0:nrow(reftree$edge))
   counts[ , "ancNode"] <- c(0, reftree$edge[ , 1])
-  counts[ , "descNode"] <- c((length(reftree$tip.label) + 1), reftree$edge[ , 2])
+  counts[ , "descNode"] <- c((length(reftree$tip.label) + 1), 
+    reftree$edge[ , 2])
   counts[ , "original_bl"] <- c(0, reftree$edge.length)
   
   info <- tree_summary$branchlength_info
@@ -116,7 +118,8 @@ createCountsTable <- function(reftree, tree_summary) {
   descs <- getDescs(reftree, node = counts[1, "descNode"])
   counts[1, "nTips"] <- sum(descs <= length(reftree$tip.label))
   counts[1, "mid"] <- 0
-  counts[1, "species"] <- paste0(reftree$tip.label[order(reftree$tip.label)], collapse = ",")
+  counts[1, "species"] <- paste0(reftree$tip.label[order(reftree$tip.label)], 
+    collapse = ",")
 
   for (i in 2:nrow(counts)) {
     descs <- getDescs(reftree, node = counts[i, "descNode"])
@@ -151,12 +154,16 @@ createCountsTable <- function(reftree, tree_summary) {
 scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
   alltypes <- allmrcas <- vector(mode = "list", length = nrow(rj_output))
 
-  rates <- matrix(rep(1, nrow(counts) * nrow(rj_output)), ncol = nrow(rj_output))
+  rates <- matrix(
+    rep(1, nrow(counts) * nrow(rj_output)), ncol = nrow(rj_output)
+  )
   rownames(rates) <- counts[ , "descNode"]
 
   # make lists for the origins of deltas etc.
   .tmp <- rep(1, nrow(rj_output))
-  Node <- Branch <- Delta <- Lambda <- Kappa <- Node_effects <- replicate(nrow(counts), as.numeric(paste(.tmp)), simplify = FALSE)  
+  Node <- Branch <- Delta <- Lambda <- Kappa <- Node_effects <- replicate(
+    nrow(counts), as.numeric(paste(.tmp)), simplify = FALSE
+  )  
   names(Node) <- names(Branch) <- names(Delta) <- names(Lambda) <- names(Kappa) <- names(Node_effects) <- counts[ , "descNode"]
 
   print("Searching for scalars...")
@@ -167,11 +174,12 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
     }
     
     for (i in 1:nrow(rj_output)) {
-      # This step is extremely slow - I wonder if keeping rj_output as a long list,
-      # rather than smartBinding it might help.
+      # This step is extremely slow - I wonder if keeping rj_output as a long 
+      # list, rather than smartBinding it might help.
       lastrates <- rj_output[i, !is.na(rj_output[i, ])]
       
-      # If the number of columns is seven, there are no scalars applied this generation.
+      # If the number of columns is seven, there are no scalars applied this 
+      # generation.
       if (length(lastrates) == 7) {
         nodes <- NA
         scales <- NA
@@ -183,7 +191,9 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
         nodes <- unlist(c(int[grep("NodeID*", names(int))]))
         scales <- unlist(c(int[grep("Scale*", names(int))]))
         types <- unlist(c(int[grep("NodeBranch*", names(int))]))
-        mrcas <- sapply(nodes, function(x) fullmrcas[fullmrcas$node %in% x, "mrca"])
+        mrcas <- sapply(
+          nodes, function(x) fullmrcas[fullmrcas$node %in% x, "mrca"]
+        )
         alltypes[[i]] <- types
         allmrcas[[i]] <- mrcas
 
@@ -191,7 +201,9 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
         # within this function? I wonder if this could be an after-the-fact 
         # function...
         for (j in seq_along(mrcas)) {
-          nm <- paste0(types[j], "[[\"", as.character(mrcas[j]), "\"]]", "[", i, "]")
+          nm <- paste0(
+            types[j], "[[\"", as.character(mrcas[j]), "\"]]", "[", i, "]"
+          )
           eval(parse(text = paste0(nm, "<-", scales[j])))
         }
       }
@@ -218,7 +230,8 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
 #' @param scales A vector of scalars for a node
 #' @param name The name of the node
 #' @param tree The time tree
-#' @param Node_effects A list, one element per node, to fill with the cumulative scalars
+#' @param Node_effects A list, one element per node, to fill with the cumulative 
+#' scalars
 #' @name multiplyNodes
 #' @keywords internal
 multiplyNodes <- function(scales, name, tree, Node_effects) {
@@ -231,12 +244,17 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 ##############################################################################
 #' rjpp
 #'
-#' A function that takes the output of a kappa, lambda, delta, VRates etc. RJ bayesTraits run and runs post-processing on it.
+#' A function that takes the output of a kappa, lambda, delta, VRates etc. RJ 
+#' bayesTraits run and runs post-processing on it.
 #' @param rjlog The RJ output of the run - typically suffixed with .VarRates.txt
-#' @param tree The time tree the analysis was run on as an object of class "phylo", or the filename of the timetree.
-#' @param burnin The burnin (if required) for the mcmc (generally worked out from the other logfile)
-#' @param thinning Thinning parameter for the MCMC output - again, worked out from the raw MCMC output logfile.
-#' @param meanbranches If true, calculates mean, median and mode branch lengths and returns mean tree.
+#' @param tree The time tree the analysis was run on as an object of class 
+#' "phylo", or the filename of the timetree.
+#' @param burnin The burnin (if required) for the mcmc (generally worked out 
+#' from the other logfile)
+#' @param thinning Thinning parameter for the MCMC output - again, worked out 
+#' from the raw MCMC output logfile.
+#' @param meanbranches If true, calculates mean, median and mode branch lengths 
+#' and returns mean tree.
 #' @param ratestable 
 #' @import phytools pbapply ape
 #' @export
@@ -266,8 +284,8 @@ profvis({
     print("Calculating mean branch lengths.")
   }
 
-  tree_summary <- summariseTrees(reftree = reftree, trees = rjtrees, burnin = burnin, 
-    thinning = thinning, verbose = verbose)
+  tree_summary <- summariseTrees(reftree = reftree, trees = rjtrees, 
+    burnin = burnin, thinning = thinning, verbose = verbose)
 
   rj_output <- rjout$rj_output
   subtrees <- rjout$subtrees
@@ -279,7 +297,8 @@ profvis({
   }
   
   if (verbose) {
-    taxa <- pbapply::pblapply(subtrees$node, function(x) getTaxa(x, subtrees = subtrees))
+    taxa <- pbapply::pblapply(subtrees$node, function(x) getTaxa(x, 
+      subtrees = subtrees))
   } else {
     taxa <- lapply(subtrees$node, function(x) getTaxa(x, subtrees = subtrees))
   }
@@ -342,44 +361,55 @@ profvis({
   lstaxa <- counts$descNode %in% names(ls)
 
   counts$nOrgnBRate[bstaxa] <- bs[match(counts$descNode[bstaxa], names(bs))] 
-  counts$nOrgnScalar[bstaxa] <- counts$nOrgnBRate[bstaxa] + bs[match(counts$descNode[bstaxa], names(bs))] 
+  counts$nOrgnScalar[bstaxa] <- counts$nOrgnBRate[bstaxa] + 
+  bs[match(counts$descNode[bstaxa], names(bs))] 
   
   counts$nOrgnNRate[nstaxa] <- ns[match(counts$descNode[nstaxa], names(ns))]
-  counts$nOrgnScalar[nstaxa] <- counts$nOrgnBRate[nstaxa] + ns[match(counts$descNode[nstaxa], names(ns))]
+  counts$nOrgnScalar[nstaxa] <- counts$nOrgnBRate[nstaxa] + 
+  ns[match(counts$descNode[nstaxa], names(ns))]
   
   counts$nOrgnDelta[dstaxa] <- ds[match(counts$descNode[dstaxa], names(ds))]
-  counts$nOrgnScalar[dstaxa] <- counts$nOrgnBRate[dstaxa] + ds[match(counts$descNode[dstaxa], names(ds))]
+  counts$nOrgnScalar[dstaxa] <- counts$nOrgnBRate[dstaxa] + 
+  ds[match(counts$descNode[dstaxa], names(ds))]
   
   counts$nOrgnKappa[kstaxa] <- ks[match(counts$descNode[kstaxa], names(ks))]
-  counts$nOrgnScalar[kstaxa] <- counts$nOrgnBRate[kstaxa] + ks[match(counts$descNode[kstaxa], names(ks))]
+  counts$nOrgnScalar[kstaxa] <- counts$nOrgnBRate[kstaxa] + 
+  ks[match(counts$descNode[kstaxa], names(ks))]
   
   counts$nOrgnLambda[lstaxa] <- ls[match(counts$descNode[lstaxa], names(ls))]
-  counts$nOrgnScalar[lstaxa] <- counts$nOrgnBRate[lstaxa] + ls[match(counts$descNode[lstaxa], names(ls))]
+  counts$nOrgnScalar[lstaxa] <- counts$nOrgnBRate[lstaxa] + 
+  ls[match(counts$descNode[lstaxa], names(ls))]
   
   # Fill in transformation detail.
 
   counts[ , "meanDelta"] <- rowMeans(origins$delta)
   counts[ , "medianDelta"] <- apply(origins$delta, 1, median)
   counts[ , "modeDelta"] <-  apply(origins$delta, 1, modeStat)
-  counts[ , "rangeDelta"] <- suppressWarnings(apply(origins$delta, 1, max) - apply(origins$delta, 1, min))
+  counts[ , "rangeDelta"] <- suppressWarnings(apply(origins$delta, 1, max) - 
+    apply(origins$delta, 1, min))
 
   counts[ , "meanKappa"] <- rowMeans(origins$kappa)
   counts[ , "medianKappa"] <- apply(origins$kappa, 1, median)
   counts[ , "modeKappa"] <- apply(origins$kappa, 1, modeStat)
-  counts[ , "rangeKappa"] <- suppressWarnings(apply(origins$kappa, 1, max) - apply(origins$kappa, 1, min))
+  counts[ , "rangeKappa"] <- suppressWarnings(apply(origins$kappa, 1, max) - 
+    apply(origins$kappa, 1, min))
 
   counts[ , "meanLambda"] <- rowMeans(origins$lambda)
   counts[ , "medianLambda"] <- apply(origins$lambda, 1, median)
   counts[ , "modeLambda"] <- apply(origins$lambda, 1, modeStat)
-  counts[ , "rangeLambda"] <- suppressWarnings(apply(origins$lambda, 1, max) - apply(origins$lambda, 1, min))
+  counts[ , "rangeLambda"] <- suppressWarnings(apply(origins$lambda, 1, max) - 
+    apply(origins$lambda, 1, min))
 
   counts[ , "meanRate"] <- rowMeans(origins$rates)
   counts[ , "medianRate"] <- apply(origins$rates, 1, median)
   counts[ , "modeRate"] <- apply(origins$rates, 1, modeStat)
-  counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - apply(origins$rates, 1, min))
+  counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - 
+    apply(origins$rates, 1, min))
 
   counts[ , "itersScaled"] <- 
-  counts[ , "itersRatescaled"] <- apply(origins$rates, 1, function(x) sum(x != 1))
+  counts[ , "itersRatescaled"] <- apply(origins$rates, 1, function(x) {
+    sum(x != 1)
+  })
   counts[ , "itersDelta"] <- counts[ , "nOrgnDelta"]
   counts[ , "itersKappa"] <- counts[ , "nOrgnDelta"]
   counts[ , "itersLambda"] <- counts[ , "nOrgnDelta"]
@@ -397,7 +427,8 @@ profvis({
   counts[ , "nLambda"] <- counts[ , "nOrgnDelta"]
 
   # The big table 100% needs to be a tibble, and so do each of the per-iteration
-  # scalar origins. With that in mind, I think the whole thing needs to have a class
+  # scalar origins. With that in mind, I think the whole thing needs to have a 
+  # class
   # and a custom print method - it just makes the most sense.
 
   counts <- counts[ , apply(counts, 2, function(x) all(x != 1))]

@@ -6,7 +6,8 @@
 #' and standard deviation of the parameter estimates.
 #' @param logfile The name of the logfile of the BayesTraits analysis, or an
 #' object of class "bt_post" (see \link[BTprocessR]{loadPosterior})
-#' @param parameter The name(s) of one or more parameters present in the logfile.
+#' @param parameter The name(s) of one or more parameters present in the 
+#' logfile.
 #' @param ... Additional arguments passed to \link[BTprocessR]{loadPosterior}.
 #' @return An object of class data.frame with a row for each parameter, and
 #' columns for the mean, median, mode and standard deviation of those

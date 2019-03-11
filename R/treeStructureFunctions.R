@@ -1,7 +1,8 @@
-##########################################################################################
+################################################################################
 #' getDescs
 #'
-#' A function to get all descendant nodes from a given node, or vector of tip labels.
+#' A function to get all descendant nodes from a given node, or vector of tip 
+#' labels.
 #' @param tree A tree of class phylo
 #' @param node Either a single node, or a vector of tip labels
 #' @name getDescs
@@ -31,7 +32,7 @@ getDescs <- function(tree, node, nds = NULL) {
   return(nds)
 }
 
-##########################################################################################
+################################################################################
 #' getPL
 #' Gets the path length from the root to the position of a particular node.
 #' @export
@@ -54,7 +55,8 @@ getPL <- function(tree, startnode = NA, node) {
   
   }
   
-  # If the terminal node we care about is not a terminal, we want to remove the branches after our node
+  # If the terminal node we care about is not a terminal, we want to remove the 
+  # branches after our node
   if(node > ape::Ntip(tree)) {
 
     paths <- lapply(paths, function(x) x <- x[x > ape::Ntip(tree)])
@@ -82,10 +84,11 @@ getPL <- function(tree, startnode = NA, node) {
   return(distance)
 }
 
-##########################################################################################
+################################################################################
 #' getTipNames
 #'
-#' A function to get the names of the descendant tips from a given node of a tree.
+#' A function to get the names of the descendant tips from a given node of a 
+#' tree.
 #' @param tree A tree of class phylo.
 #' @param node The node number of interest.
 #' @export
@@ -96,11 +99,13 @@ getTipNames <- function(tree, node) {
   tree$tip.label[descs]
 }
 
-##########################################################################################
+################################################################################
 #' getTaxa
 #'
-#' This gets the taxa names of a particular subtree from a list of all subtrees comprising a full tree.
-#' @param subtrees A list of subtrees, as written by BayesTraits, and read in during post-processing
+#' This gets the taxa names of a particular subtree from a list of all subtrees 
+#' comprising a full tree.
+#' @param subtrees A list of subtrees, as written by BayesTraits, and read in 
+#' during post-processing
 #' @param node The node number of interest.
 #' @name getTaxa
 #' @keywords internal
@@ -112,12 +117,15 @@ getTaxa <- function(x, subtrees) {
   return(as.numeric(unlist(taxa)))
 }
 
-##########################################################################################
+################################################################################
 #' getMRCAbtr
 #'
-#' This an extension of apes's getMRCA that enables the return of a tip, or an MRCA. Translates taxa codes (BayesTraits) to proper tip labels. Useful only in post-processing.
+#' This an extension of apes's getMRCA that enables the return of a tip, or an 
+#' MRCA. Translates taxa codes (BayesTraits) to proper tip labels. Useful only 
+#' in post-processing.
 #' @param x A vector of taxa names
-#' @param tree A phylogeny of class "phylo" (generally the time tree used as input to BayesTraits)
+#' @param tree A phylogeny of class "phylo" (generally the time tree used as 
+#' input to BayesTraits)
 #' @param rjtaxa The taxa translations as output from BayesTraits
 #' @name getMRCAbtr
 #' @keywords internal

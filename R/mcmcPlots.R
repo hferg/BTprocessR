@@ -24,7 +24,8 @@ mcmcPlots <- function(logfile, parameters = NULL, ...) {
     # posterior <- loadPosterior(logfile, ...)
   }
 
-  posterior <- posterior[, !colnames(posterior) %in% c("Iteration", "Harmonic.Mean", "Tree.No")]  
+  posterior <- posterior[, !colnames(posterior) %in% c(
+    "Iteration", "Harmonic.Mean", "Tree.No")]  
   if (!is.null(parameters)) {
     posterior <- posterior[, colnames(posterior) %in% parameters]
   } else {

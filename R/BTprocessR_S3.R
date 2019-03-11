@@ -21,7 +21,8 @@
 
 autoplot.bt_post <- function(posterior, parameters = NULL, col = NULL,
                              pal = "D") {
-  d <- posterior[, !colnames(posterior) %in% c("Iteration", "Harmonic.Mean", "Tree.No")]
+  d <- posterior[, !colnames(posterior) %in% c("Iteration", "Harmonic.Mean", 
+    "Tree.No")]
   if (!is.null(parameters)) {
     d <- d[, colnames(d) %in% parameters]
   } else {

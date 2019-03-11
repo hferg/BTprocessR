@@ -1,25 +1,28 @@
 #' summariseTrees
 #'
-#' Summarise a posterior sample of trees from a rate-varible or RJ local transformation
-#' BayesTraits MCMC analysis.
-#' @param reftree A tree that provides the reference topology (in most cases this is
-#' time-tree the analysis was run on). Can be a filename of a tree in the working 
-#' directory or an object of class "phylo"
-#' @param trees The posterior sample of trees from a rate-variable or RJlocaltransformation 
-#' MCMC BayesTraits analysis. Typically will have the .Output.trees extension. Either 
-#' the filename of the posterior, or an object of class "multiPhylo".
-#' @param verbose If TRUE a progress bar will be shown when ladderizing the posterior
-#' trees (this step can be time consuming).
+#' Summarise a posterior sample of trees from a rate-varible or RJ local 
+#' transformation BayesTraits MCMC analysis.
+#' @param reftree A tree that provides the reference topology (in most cases 
+#' this is time-tree the analysis was run on). Can be a filename of a tree in 
+#' the working directory or an object of class "phylo"
+#' @param trees The posterior sample of trees from a rate-variable or 
+#' RJlocaltransformation MCMC BayesTraits analysis. Typically will have the 
+#' .Output.trees extension. Either the filename of the posterior, or an object 
+#' of class "multiPhylo".
+#' @param verbose If TRUE a progress bar will be shown when ladderizing the 
+#' posterior trees (this step can be time consuming).
 #' @param burnin Number of trees to discard as burnin (if, for example, the MCMC 
 #' chain had not converged until later in the run).
-#' @param thinning If >1 then every nth tree will be sampled - useful if the sampling
-#' interval of the original MCMC analysis was too small. Note that is it preferable
-#' to ensure proper chain convergence prior to analysis of the results, in which case
-#' the default settings of burnin and thinning will be appropriate.
+#' @param thinning If >1 then every nth tree will be sampled - useful if the 
+#' sampling interval of the original MCMC analysis was too small. Note that is 
+#' it preferable to ensure proper chain convergence prior to analysis of the 
+#' results, in which case the default settings of burnin and thinning will be 
+#' appropriate.
 #' @export
 #' @name summariseTrees
 
-summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = TRUE) {
+summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, 
+  verbose = TRUE) {
 
   pbapply::pboptions(type = "timer", style = 3, char = "*")
 
@@ -52,7 +55,9 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1, verbose = T
   
   # and check topology
   for (i in seq_along(trees)) {
-    if (sum(reftree$tip.label == trees[[i]]$tip.label) != length(reftree$tip.label)) {
+    if (sum(
+      reftree$tip.label == trees[[i]]$tip.label) != length(reftree$tip.label
+    )) {
       stop(paste("Tip labels on tree", i, "do not mactch reference tree"))
     }  
     if (sum(reftree$edge == trees[[i]]$edge) != length(reftree$edge)) {

@@ -12,8 +12,9 @@
 #' chain as burnin. Use if the chain has not reached convergence before sampling
 #' began. Useful if the burnin parameter for the analysis itself was not long
 #' enough.
-#' @return A tibble (see \link[tibble]{tibble}) with the class "bt_post" containing
-#' the samples from the BayesTraits MCMC chain. Headers vary on model type.
+#' @return A tibble (see \link[tibble]{tibble}) with the class "bt_post" 
+#' containing the samples from the BayesTraits MCMC chain. Headers vary on 
+#' model type.
 #' @export
 #' @name loadPosterior
 
@@ -49,13 +50,17 @@ loadPosterior <- function(logfile, thinning = 1, burnin = 0) {
     
   }
 
-  output <- do.call(rbind, strsplit(raw[grep("\\bIteration\\b", raw):length(raw)], "\t"))
+  output <- do.call(
+    rbind, strsplit(raw[grep("\\bIteration\\b", raw):length(raw)], "\t")
+  )
   colnames(output) <- output[1, ]
   output <- output[c(2:nrow(output)), ]
   output <- data.frame(output, stringsAsFactors = FALSE)
 
   for (i in 1:ncol(output)) {
-    if (colnames(output)[i] != "Model.string" && colnames(output)[i] != "Dep...InDep") {
+    if (
+      colnames(output)[i] != "Model.string" && colnames(output)[i] != "Dep...InDep"
+    ) {
       output[ ,i] <- as.numeric(output[ ,i])
     }
 

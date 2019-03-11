@@ -49,7 +49,8 @@ ggHist <- function(posterior, param, title) {
 #' ggTrace
 #'
 #' Make a trace plot for an MCMC parameter using ggplot2.
-#' @param posterior BayesTraits MCMC output - output from loadPosterior function.
+#' @param posterior BayesTraits MCMC output - output from loadPosterior 
+#' function.
 #' @param param The paramater you want to see an autocorrelation plot for.
 
 ggTrace <- function(posterior, param, title){
@@ -83,7 +84,9 @@ ggAutoCor <- function(posterior, param, max.lag = NULL, min.lag = 0, title) {
   sig <- (abs(xacf[ ,2]) > abs(confline)) ^ 2
   col <- viridis::viridis(4)[3]
   z <- ggplot2::ggplot(xacf, ggplot2::aes(x = lag, y = acf)) +
-    ggplot2::geom_bar(color = "darkgray", stat = "identity", position = "identity", fill = col) +
+    ggplot2::geom_bar(
+      color = "darkgray", stat = "identity", position = "identity", fill = col
+    ) +
     ggplot2::geom_hline(yintercept = -confline, color = "blue", size = 0.2) +
     ggplot2::geom_hline(yintercept = confline, color = "blue", size = 0.2) +
     ggplot2::geom_hline(yintercept = 0, color = "red", size = 0.2) +
@@ -95,7 +98,8 @@ ggAutoCor <- function(posterior, param, max.lag = NULL, min.lag = 0, title) {
 #' ggRunmean
 #'
 #' Make a running mean plot for an MCMC parameter using ggplot2.
-#' @param dat The vector of the paramater you want to see an autocorrelation plot for.
+#' @param dat The vector of the paramater you want to see an autocorrelation 
+#' plot for.
 
 ggRunmean <- function(posterior, param, title, window.size = 10) {
   d <- posterior[ , colnames(posterior) == param]
@@ -123,13 +127,15 @@ ggRunmean <- function(posterior, param, title, window.size = 10) {
 
 #' smartBind
 #'
-#' A function that will rbind vectors of different lengths and return a matrix, provided each vector element is named.
+#' A function that will rbind vectors of different lengths and return a matrix, 
+#' provided each vector element is named.
 #' @param A bunch of vectors.
 #' @examples
 #' do.call(smartRbind, list.of.vectors)
 
 smartBind <- function (...) {
-  # from GSee http://stackoverflow.com/questions/17308551/do-callrbind-list-for-uneven-number-of-column
+  # from GSee 
+  # http://stackoverflow.com/questions/17308551/do-callrbind-list-for-uneven-number-of-column
   dargs <- list(...)
 
   if (!all(vapply(dargs, is.vector, TRUE)))

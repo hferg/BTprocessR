@@ -26,7 +26,9 @@ compPosts <- function(logs, parameter, alpha = 0.7, ...) {
   }
 
   # check the parameter is in all posteriors.
-  if (sum(unlist(sapply(posteriors, colnames)) == parameter) != length(posteriors)) {
+  if (
+    sum(unlist(sapply(posteriors, colnames)) == parameter) != length(posteriors)
+  ) {
     stop(paste0("Parameter ", parameter, " is not present in all posteriors."))
   }
 
