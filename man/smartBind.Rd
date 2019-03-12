@@ -10,7 +10,8 @@ smartBind(...)
 \item{A}{bunch of vectors.}
 }
 \description{
-A function that will rbind vectors of different lengths and return a matrix, provided each vector element is named.
+A function that will rbind vectors of different lengths and return a matrix, 
+provided each vector element is named.
 }
 \examples{
 do.call(smartRbind, list.of.vectors)

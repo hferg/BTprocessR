@@ -9,11 +9,14 @@ getMRCAbtr(x, tree, rjtaxa)
 \arguments{
 \item{x}{A vector of taxa names}
 
-\item{tree}{A phylogeny of class "phylo" (generally the time tree used as input to BayesTraits)}
+\item{tree}{A phylogeny of class "phylo" (generally the time tree used as 
+input to BayesTraits)}
 
 \item{rjtaxa}{The taxa translations as output from BayesTraits}
 }
 \description{
-This an extension of apes's getMRCA that enables the return of a tip, or an MRCA. Translates taxa codes (BayesTraits) to proper tip labels. Useful only in post-processing.
+This an extension of apes's getMRCA that enables the return of a tip, or an 
+MRCA. Translates taxa codes (BayesTraits) to proper tip labels. Useful only 
+in post-processing.
 }
 \keyword{internal}

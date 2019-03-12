@@ -12,5 +12,6 @@ getDescs(tree, node, nds = NULL)
 \item{node}{Either a single node, or a vector of tip labels}
 }
 \description{
-A function to get all descendant nodes from a given node, or vector of tip labels.
+A function to get all descendant nodes from a given node, or vector of tip 
+labels.
 }

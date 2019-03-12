@@ -4,29 +4,32 @@
 \alias{summariseTrees}
 \title{summariseTrees}
 \usage{
-summariseTrees(reftree, trees, burnin = 0, thinning = 1, verbose = TRUE)
+summariseTrees(reftree, trees, burnin = 0, thinning = 1,
+  verbose = TRUE)
 }
 \arguments{
-\item{reftree}{A tree that provides the reference topology (in most cases this is
-time-tree the analysis was run on). Can be a filename of a tree in the working 
-directory or an object of class "phylo"}
+\item{reftree}{A tree that provides the reference topology (in most cases 
+this is time-tree the analysis was run on). Can be a filename of a tree in 
+the working directory or an object of class "phylo"}
 
-\item{trees}{The posterior sample of trees from a rate-variable or RJlocaltransformation 
-MCMC BayesTraits analysis. Typically will have the .Output.trees extension. Either 
-the filename of the posterior, or an object of class "multiPhylo".}
+\item{trees}{The posterior sample of trees from a rate-variable or 
+RJlocaltransformation MCMC BayesTraits analysis. Typically will have the 
+.Output.trees extension. Either the filename of the posterior, or an object 
+of class "multiPhylo".}
 
 \item{burnin}{Number of trees to discard as burnin (if, for example, the MCMC 
 chain had not converged until later in the run).}
 
-\item{thinning}{If >1 then every nth tree will be sampled - useful if the sampling
-interval of the original MCMC analysis was too small. Note that is it preferable
-to ensure proper chain convergence prior to analysis of the results, in which case
-the default settings of burnin and thinning will be appropriate.}
+\item{thinning}{If >1 then every nth tree will be sampled - useful if the 
+sampling interval of the original MCMC analysis was too small. Note that is 
+it preferable to ensure proper chain convergence prior to analysis of the 
+results, in which case the default settings of burnin and thinning will be 
+appropriate.}
 
-\item{verbose}{If TRUE a progress bar will be shown when ladderizing the posterior
-trees (this step can be time consuming).}
+\item{verbose}{If TRUE a progress bar will be shown when ladderizing the 
+posterior trees (this step can be time consuming).}
 }
 \description{
-Summarise a posterior sample of trees from a rate-varible or RJ local transformation
-BayesTraits MCMC analysis.
+Summarise a posterior sample of trees from a rate-varible or RJ local 
+transformation BayesTraits MCMC analysis.
 }

@@ -7,7 +7,8 @@
 ggRunmean(posterior, param, title, window.size = 10)
 }
 \arguments{
-\item{dat}{The vector of the paramater you want to see an autocorrelation plot for.}
+\item{dat}{The vector of the paramater you want to see an autocorrelation 
+plot for.}
 }
 \description{
 Make a running mean plot for an MCMC parameter using ggplot2.

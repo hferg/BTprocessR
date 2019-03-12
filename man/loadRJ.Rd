@@ -10,7 +10,8 @@ loadRJ(logfile, burnin = 0, thinning = 1)
 \item{logfile}{The name of the logfile of the BayesTraits analysis.}
 }
 \value{
-A list containing the taxa translation table, all possible subtrees a scalar can occur on, and a data frame of the rj model configuration.
+A list containing the taxa translation table, all possible subtrees 
+a scalar can occur on, and a data frame of the rj model configuration.
 }
 \description{
 Returns the full mcmc object from a BayesTraits log file. This

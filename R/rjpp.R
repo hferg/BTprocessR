@@ -148,6 +148,8 @@ createCountsTable <- function(reftree, tree_summary) {
 #' returns them.
 #' @param rj_output partially processed RJ output.
 #' @param counts The counts table.
+#' @param fullmrcas Most recent common ancestor tables for each tip in the tree,
+#' generated internally.
 #' @keywords internal
 #' @name scalarSearch
 
@@ -234,6 +236,7 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
 #' scalars
 #' @name multiplyNodes
 #' @keywords internal
+
 multiplyNodes <- function(scales, name, tree, Node_effects) {
   # get descendents
   descs <- c(getDescs(tree, name), as.numeric(name))
@@ -477,6 +480,37 @@ profvis({
 
   res <- c(res, list(origins = origins))
 })
+  # TODO: I THINK that this should also have the tree as part of the output, so 
+  # that a plot method for the rjpp class can plot the tree with items to
+  # show the locations and directions of shifts, with a cutoff etc. etc. 
+  # See equivalent in bayestraitr. This will be a combination of plotShifts,
+  # transShifts and rateShifts, and the autoplot will probably have some
+  # arguments to go with it, with defaults.
+
+  # NOTE: Plotshifts probably has too many different versions to just be a
+  # a method actually... Although it could always just return a message if there
+  # isn't, for example, a scalar or transformation selected?
+  class(res) <- append("rjpp", class(res))
   return(res)
 }
 
+
+#' summariseRjpp
+#' This functions takes the somewhat massive output of the rjpp function and
+#' pares it down to the scalars and/or rates the user is interested in.
+#' QUESTION: Should this be limited to a single scalar type? That would include
+#' the rates and the origins?
+#' QUESTION: Is threshold important here? Or could that be in the autoplot
+#' method?
+#' @param pp An object of class "rjpp" - typically the output of the rjpp 
+#' function.
+#' @param scalar The scalar to summarise the results of. Either:
+#' node_scalar, branch_scalar, rate, lambda, delta, kappa or node_branch
+#' @param threshold The probability threshold over which scalars will be show.
+#' When equal to zero ALL scalars in the posterior will be returned. When equal 
+#' to 0.5 only scalars present in greater than 50% of posterior samples will be 
+#' returned, and so on.
+
+summariseRjpp <- function(PP, scalar) {
+
+}

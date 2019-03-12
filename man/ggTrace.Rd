@@ -7,7 +7,8 @@
 ggTrace(posterior, param, title)
 }
 \arguments{
-\item{posterior}{BayesTraits MCMC output - output from loadPosterior function.}
+\item{posterior}{BayesTraits MCMC output - output from loadPosterior 
+function.}
 
 \item{param}{The paramater you want to see an autocorrelation plot for.}
 }

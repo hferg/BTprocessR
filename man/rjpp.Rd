@@ -4,22 +4,27 @@
 \alias{rjpp}
 \title{rjpp}
 \usage{
-rjpp(rjlog, rjtrees, tree, burnin = 0, thinning = 1, ratestable = TRUE,
-  verbose = TRUE)
+rjpp(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
+  ratestable = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{rjlog}{The RJ output of the run - typically suffixed with .VarRates.txt}
 
-\item{tree}{The time tree the analysis was run on as an object of class "phylo", or the filename of the timetree.}
+\item{tree}{The time tree the analysis was run on as an object of class 
+"phylo", or the filename of the timetree.}
 
-\item{burnin}{The burnin (if required) for the mcmc (generally worked out from the other logfile)}
+\item{burnin}{The burnin (if required) for the mcmc (generally worked out 
+from the other logfile)}
 
-\item{thinning}{Thinning parameter for the MCMC output - again, worked out from the raw MCMC output logfile.}
+\item{thinning}{Thinning parameter for the MCMC output - again, worked out 
+from the raw MCMC output logfile.}
 
 \item{ratestable}{}
 
-\item{meanbranches}{If true, calculates mean, median and mode branch lengths and returns mean tree.}
+\item{meanbranches}{If true, calculates mean, median and mode branch lengths 
+and returns mean tree.}
 }
 \description{
-A function that takes the output of a kappa, lambda, delta, VRates etc. RJ bayesTraits run and runs post-processing on it.
+A function that takes the output of a kappa, lambda, delta, VRates etc. RJ 
+bayesTraits run and runs post-processing on it.
 }

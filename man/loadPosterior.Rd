@@ -18,8 +18,9 @@ began. Useful if the burnin parameter for the analysis itself was not long
 enough.}
 }
 \value{
-A tibble (see \link[tibble]{tibble}) with the class "bt_post" containing
-the samples from the BayesTraits MCMC chain. Headers vary on model type.
+A tibble (see \link[tibble]{tibble}) with the class "bt_post" 
+containing the samples from the BayesTraits MCMC chain. Headers vary on 
+model type.
 }
 \description{
 Returns the full mcmc object from a BayesTraits log file. This

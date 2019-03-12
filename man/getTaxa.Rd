@@ -7,11 +7,13 @@
 getTaxa(x, subtrees)
 }
 \arguments{
-\item{subtrees}{A list of subtrees, as written by BayesTraits, and read in during post-processing}
+\item{subtrees}{A list of subtrees, as written by BayesTraits, and read in 
+during post-processing}
 
 \item{node}{The node number of interest.}
 }
 \description{
-This gets the taxa names of a particular subtree from a list of all subtrees comprising a full tree.
+This gets the taxa names of a particular subtree from a list of all subtrees 
+comprising a full tree.
 }
 \keyword{internal}

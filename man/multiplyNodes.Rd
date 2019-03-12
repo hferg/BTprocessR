@@ -14,7 +14,8 @@ multiplyNodes(scales, name, tree, Node_effects)
 
 \item{tree}{The time tree}
 
-\item{Node_effects}{A list, one element per node, to fill with the cumulative scalars}
+\item{Node_effects}{A list, one element per node, to fill with the cumulative 
+scalars}
 }
 \description{
 multiplyNodes

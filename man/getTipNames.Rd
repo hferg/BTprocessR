@@ -12,5 +12,6 @@ getTipNames(tree, node)
 \item{node}{The node number of interest.}
 }
 \description{
-A function to get the names of the descendant tips from a given node of a tree.
+A function to get the names of the descendant tips from a given node of a 
+tree.
 }

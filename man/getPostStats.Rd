@@ -10,7 +10,8 @@ getPostStats(logfile, parameter, ...)
 \item{logfile}{The name of the logfile of the BayesTraits analysis, or an
 object of class "bt_post" (see \link[BTprocessR]{loadPosterior})}
 
-\item{parameter}{The name(s) of one or more parameters present in the logfile.}
+\item{parameter}{The name(s) of one or more parameters present in the 
+logfile.}
 
 \item{...}{Additional arguments passed to \link[BTprocessR]{loadPosterior}.}
 }
