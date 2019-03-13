@@ -62,8 +62,8 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 ##############################################################################
 #' createCounts
 #' Creates the counts table for the rjpp.
-#' @param extree The time tree
-#' @param meanbl The output of meanBranches
+#' @param reftree The time tree
+#' @param tree_summary The output of summariseTrees
 #' @name createCounts
 #' @keywords internal
 
@@ -81,11 +81,10 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 # It should also have a method that prints the names properly when called,
 # and when a specific node is selected.
 
-createCountsTable <- function(reftree, tree_summary) {
-  counts <- matrix(ncol = 53, nrow = (nrow(reftree$edge) + 1))
+createCountsTable <- function(reftree) {
+  counts <- matrix(ncol = 48, nrow = (nrow(reftree$edge) + 1))
   colnames(counts) <- c("branch", "ancNode", "descNode", "nTips", "start", 
-      "end", "mid", "original_bl", "mean_bl", "median_bl", "mode_bl", 
-      "range_bl", "sd_bl", "itersScaled", "itersRatescaled", "itersDelta", 
+      "end", "mid", "itersScaled", "itersRate", "itersDelta", 
       "itersKappa", "itersLambda", "pScaled", "pRate", "pDelta", "pKappa", 
       "pLambda", "nScalar", "nRate", "nDelta", "nKappa", "nLambda", 
       "nOrgnScalar", "nOrgnNRate", "nOrgnBRate", "nOrgnDelta", "nOrgnKappa", 
@@ -99,13 +98,6 @@ createCountsTable <- function(reftree, tree_summary) {
   counts[ , "descNode"] <- c((length(reftree$tip.label) + 1), 
     reftree$edge[ , 2])
   counts[ , "original_bl"] <- c(0, reftree$edge.length)
-  
-  info <- tree_summary$branchlength_info
-  counts[ , "mean_bl"] <- c(0, info$mean_bl)
-  counts[ , "median_bl"] <- c(0, info$median_bl)
-  counts[ , "mode_bl"] <- c(0, info$mode_bl)
-  counts[ , "range_bl"] <- c(0, info$range_bl)
-  counts[ , "sd_bl"] <- c(0, info$sd_bl)
 
   hts <- phytools::nodeHeights(reftree)
   hts <- round(abs(hts - max(hts)), 4)
@@ -245,6 +237,27 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 }
 
 ##############################################################################
+#' makeSpKey
+#' Detaches the species descendant from a node from the counts table and adds an
+#' id column to match to a species key list.
+#' @param counts The finished counts table.
+#' @name makeSpKey
+#' @keywords internal
+
+makeSpKey <- function(counts) {
+  species_key <- vector(mode = "list", length = nrow(counts))
+  counts$node_id <- names(species_key) <- paste0("node_", c(1:nrow(counts)))
+  
+  for (i in seq_along(species_key)) {
+    species_key[[i]]$nodes <- counts[i, 1:2]
+    species_key[[i]]$species <- strsplit(counts[i, "species"], ",")[[1]]
+  }
+
+  counts <- counts[ , names(counts) != "species"]
+  return(list(counts = counts, species_key = species_key))
+}
+
+##############################################################################
 #' rjpp
 #'
 #' A function that takes the output of a kappa, lambda, delta, VRates etc. RJ 
@@ -265,7 +278,6 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 
 rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
    ratestable = TRUE, verbose = TRUE) {
-profvis({
   pbapply::pboptions(type = "timer", style = 3, char = "*")
 
   if (class(tree) == "phylo") {
@@ -322,7 +334,7 @@ profvis({
   }
   
   fullmrcas <- data.frame(node = subtrees$node, mrca = fullmrcas) 
-  counts <- createCountsTable(reftree, tree_summary)
+  counts <- createCountsTable(reftree)
 
   # Find the scalars.
   all_scalars <- scalarSearch(rj_output, counts, fullmrcas, verbose = verbose)
@@ -331,7 +343,7 @@ profvis({
   for (i in 1:length(all_scalars$Node)) {
     .tmp <- multiplyNodes(all_scalars$Node[[i]], 
       names(all_scalars$Node)[i], 
-      extree, 
+      tree, 
       all_scalars$Node_effects)
     all_scalars$Node_effects[names(.tmp)] <- .tmp
   }
@@ -409,21 +421,27 @@ profvis({
   counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - 
     apply(origins$rates, 1, min))
 
-  counts[ , "itersScaled"] <- 
-  counts[ , "itersRatescaled"] <- apply(origins$rates, 1, function(x) {
+  # what is iters scaled meant to be? I THINK the number of iterations that the
+  # branch length is NOT the same as it's original branch length? This needs to
+  # be figured out with an example with both variable rates and another 
+  # transformation.
+  counts[ , "itersScaled"] <- NA
+  counts[ , "itersRate"] <- apply(origins$rates, 1, function(x) {
     sum(x != 1)
   })
   counts[ , "itersDelta"] <- counts[ , "nOrgnDelta"]
   counts[ , "itersKappa"] <- counts[ , "nOrgnDelta"]
   counts[ , "itersLambda"] <- counts[ , "nOrgnDelta"]
 
-  counts[ , "pScaled"] <- 
+  # what is pscaled meant to be? Relate to itersScled
+  counts[ , "pScaled"] <- NA
   counts[ , "pRate"] <- apply(origins$rates, 1, function(x) sum(x != 1)) / niter
   counts[ , "pDelta"] <- counts[ , "nOrgnDelta"] / niter
   counts[ , "pKappa"] <- counts[ , "nOrgnKappa"] / niter
   counts[ , "pLambda"] <- counts[ , "nOrgnLambda"] / niter
 
-  counts[ , "nScalar"] <- 
+  # what is nscalar meant to be? The number of scalars effecting the branch?
+  counts[ , "nScalar"] <- NA
   counts[ , "nRate"] <- counts[ , "nOrgnNRate"] + counts[ , "nOrgnBRate"]
   counts[ , "nDelta"] <- counts[ , "nOrgnDelta"]
   counts[ , "nKappa"] <- counts[ , "nOrgnDelta"]
@@ -437,10 +455,9 @@ profvis({
   counts <- counts[ , apply(counts, 2, function(x) all(x != 1))]
   counts <- counts[ , apply(counts, 2, function(x) all(x != 0))]
 
-  if (meanbranches) {
-    meantree <- extree
-    meantree$edge.length <- counts[c(2:nrow(counts)) , "meanBL"]
-  }
+  tmp <- makeSpKey(counts)
+  counts <- tmp$counts
+  species_key <- tmp$species_key
 
   if (all(sapply(origins$delta, function(x) all(x == 1)))) {
     origins$delta <- NULL
@@ -466,26 +483,21 @@ profvis({
     origins$rates <- NULL
   }
 
-  if (meanbranches) { 
-    res <- list(data = counts, niter = niter, meantree = meantree)
-  } else {
-    res <- list(data = counts, niter = niter)
-  }
+  res <- list(
+    data = tibble::as_tibble(counts), 
+    tree_summary = tree_summary,
+    species_key = species_key
+  )
 
   if (!is.null(origins$rates)) {
-    scalars <- list(rates = origins$rates)
+    scalars <- list(rates = tibble::as_tibble(origins$rates))
     origins$rates <- NULL
-    res <- c(res, list(scalars = scalars))
+    res <- c(res, list(scalars = tibble::as_tibble(scalars)))
   }
 
-  res <- c(res, list(origins = origins))
-})
-  # TODO: I THINK that this should also have the tree as part of the output, so 
-  # that a plot method for the rjpp class can plot the tree with items to
-  # show the locations and directions of shifts, with a cutoff etc. etc. 
-  # See equivalent in bayestraitr. This will be a combination of plotShifts,
-  # transShifts and rateShifts, and the autoplot will probably have some
-  # arguments to go with it, with defaults.
+  origins <- lapply(origins, tibble::as_tibble)
+
+  res <- c(res, list(origins = origins), niter = niter)
 
   # NOTE: Plotshifts probably has too many different versions to just be a
   # a method actually... Although it could always just return a message if there

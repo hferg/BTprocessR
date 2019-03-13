@@ -9,9 +9,9 @@ Creates the counts table for the rjpp.}
 createCountsTable(reftree, tree_summary)
 }
 \arguments{
-\item{extree}{The time tree}
+\item{reftree}{The time tree}
 
-\item{meanbl}{The output of meanBranches}
+\item{tree_summary}{The output of summariseTrees}
 }
 \description{
 createCounts

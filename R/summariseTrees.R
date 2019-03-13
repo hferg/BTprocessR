@@ -84,7 +84,7 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1,
                         mode_tree = modetree)
   class(summarytrees) <- c("trees_summary", "multiPhylo")
 
-  bls <- tibble(original_bl = reftree$edge.length,
+  bls <- tibble::tibble(original_bl = reftree$edge.length,
                     mean_bl = meanbl,
                     median_bl = medianbl,
                     mode_bl = modebl,
@@ -93,6 +93,6 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1,
 
   res <- list(tree_summaries = summarytrees,
               branchlength_info = bls)
-  
+  class(res) <- append("rj_trees", class(res))
   return(res)
 }

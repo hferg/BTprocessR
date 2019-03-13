@@ -38,7 +38,7 @@ autoplot.bt_post <- function(posterior, parameters = NULL, col = NULL,
     ggplot2::theme_minimal(base_family = "Helvetica") +
     viridis::scale_fill_viridis(discrete = TRUE) +
     ggplot2::facet_wrap( ~ variable, scales = "free") +
-    theme(
+    ggplot2::theme(
       legend.position = "none"
     )
   p

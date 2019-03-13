@@ -107,6 +107,53 @@ plot(post_trees$tree_summaries, tree = "median_tree")
 
 # Summarising and interpreting RJ output
 
+As well as the posterior sample of trees BayesTraits also returns a lot of information about the location and magnitude of the scalars and transformations applied to the trees during the MCMC process. This information can be summarised and manipulated to identify shifts that appear frequently in the posterior, as well as to identify regions of the tree that are frequently scaled and transformed by other rootward processes. The first step is to read and process this raw information, which will typically be appended the suffix ".VarRates.txt". This process also requires the posterior sample of transformed trees, and the original time tree to use as a reference. The example below is for a variable rates analysis. Note that the output of rjpp will include the tree summary as produced by summariseTrees, so it may not be necessary to use the function in isolation (as above).
+
+```{r rjpp}
+# the rjpp function takes the filename/filepath to the .VarRates.txt file.
+# for variable rates...
+rj_info <- system.file("extdata", "marsupials_vrates.txt.VarRates.txt", package = "BTprocessR")
+vrates_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vrates_trees, tree = marsupial_trees$timetree)
+
+# or for variable delta...
+rj_info <- system.file("extdata", "marsupials_variabledelta.txt.VarRates.txt", package = "BTprocessR")
+vdelta_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vrates_trees, tree = marsupial_trees$timetree)
+
+# rjpp returns a list with six elements, and a lot of information.
+class(vrates_summary)
+names(vrates_summary)
+
+```
+
+The first element "data" is a tibble that contains lots of information. Each row is a branch of the tree, as defined by ancestral (ancNode - note that node 0 is the root) and descendent (descNode). "nTips" is the number of tips desecendant from the descendant node of the branch, "start", "end" and "mid" are the start, end and midpoint of the branch on the time tree (in the same units as the time tree). Next is a variable number of columns depending on the transformations allowed in the model. Each column name is made up of a prefix denoting the data in the column, and a suffix denoting the transformation that the data is pertinent to. In MOST cases the transformations apply to a node, which is defined as the desecendent node of the ancestor-descendant pair (the only instance this doesn't apply is for branch rate scalars). 
+The prefixes are:
+iters - the number of the node/branch is affected by the suffixed transformation in the posterior 
+p - the probability the node/branch is affected by the suffixed transformation in the posterior (iters / total number of iterations)
+n - the number 
+nOrgn - the number of the suffixed transformations that originate at this node/branch
+range - the range in the magnitude of the suffixed transformation applied to this node/branch
+mean - the mean value of the suffixed transformations applied to this node/branch (note that this excludes samples when the branch receives no transformation)
+median - the median value of the suffixed transformations applied to this node/branch (note that this excludes samples when the branch receives no transformation)
+mode - the modal value of the suffixed transformations applied to this node/branch (note that this excludes samples when the branch receives no transformation)
+
+and the suffixes are:
+Scalar - denotes any/all scalars possible in the specified model.
+Rate - linear rate scalars
+Delta - delta transformations
+Lambda - lambda transforamtions
+Kappa - kappa transformations
+BRate - single branch linear rate scalars (i.e. only the branch is transformed)
+NRate - node linear rate scalars (i.e. the branch and all descendent branches are transformed)
+
+The final column in "data" is called "node_id" - this relates the node to the element of the output "species_key" which details the name of each species descendent from the node.
+
+The second element, "tree_summary", is the output of the function summariseTrees - it contains the original time-tree, the mean, median and modal trees from the posterior, and the branch length information for all of these trees (which is duplicated from the "data" table).
+
+The third element is "species_key". This is a list with one element per branch of the tree (including the root). Each of these elements contains the ancestor node and descendent node of the branch, and the identities of all species descending from it. The names of each element correspond to the node_id column in "data".
+
+Next there are two large tibbles, "scalars" and "origins". Each of these has a number of rows equal to the number of edges in the tree and a number of columns equal to the number of samples in the posterior. Scalars contains scalar a branch receives in each sample (i.e. including the effects of rootward scalars), and origins contains just the values of the scalars that each node received in each sample. If multiple transformations are permitted in the model then scalars and origins will have a seperate tibble for each transformation.
+
+Finally there is a single integer "niters" - this is simply the number of samples in the posterior and is used in downstream functions.
 
 
 <!-- ## Contents -->
