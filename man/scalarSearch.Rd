@@ -12,6 +12,9 @@ scalarSearch(rj_output, counts, fullmrcas, verbose)
 \item{rj_output}{partially processed RJ output.}
 
 \item{counts}{The counts table.}
+
+\item{fullmrcas}{Most recent common ancestor tables for each tip in the tree,
+generated internally.}
 }
 \description{
 scalarSearch
