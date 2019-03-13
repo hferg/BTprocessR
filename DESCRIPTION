@@ -16,5 +16,7 @@ Imports:
   tibble,
   viridis,
   ggthemes,
-  pbapply
+  pbapply,
+  phytools,
+  ggplot2
 RoxygenNote: 6.1.1
