@@ -6,7 +6,7 @@
 \title{createCounts
 Creates the counts table for the rjpp.}
 \usage{
-createCountsTable(reftree, tree_summary)
+createCountsTable(reftree)
 }
 \arguments{
 \item{reftree}{The time tree}
