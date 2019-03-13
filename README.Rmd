@@ -117,7 +117,7 @@ vrates_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vrates_trees, 
 
 # or for variable delta...
 rj_info <- system.file("extdata", "marsupials_variabledelta.txt.VarRates.txt", package = "BTprocessR")
-vdelta_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vrates_trees, tree = marsupial_trees$timetree)
+vdelta_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vdelta_trees, tree = marsupial_trees$timetree)
 
 # rjpp returns a list with six elements, and a lot of information.
 class(vrates_summary)
@@ -144,6 +144,13 @@ Lambda - lambda transforamtions
 Kappa - kappa transformations
 BRate - single branch linear rate scalars (i.e. only the branch is transformed)
 NRate - node linear rate scalars (i.e. the branch and all descendent branches are transformed)
+
+```{r rjpp_twomods}
+# Some of this should be clearer with an example where two transformations are permitted.
+rj_info <- system.file("extdata", "marsupials_variabledeltarate.txt.VarRates.txt", package = "BTprocessR")
+vdeltarate_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vdeltarate, tree = marsupial_trees$timetree)
+
+```
 
 The final column in "data" is called "node_id" - this relates the node to the element of the output "species_key" which details the name of each species descendent from the node.
 
