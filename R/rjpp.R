@@ -82,56 +82,65 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 # and when a specific node is selected.
 
 createCountsTable <- function(reftree) {
-  counts <- matrix(ncol = 48, nrow = (nrow(reftree$edge) + 1))
-  colnames(counts) <- c("branch", "ancNode", "descNode", "nTips", "start", 
+  counts <- matrix(ncol = 46, nrow = (nrow(reftree$edge) + 1))
+  colnames(counts) <- c("node_id", "branch", "ancNode", "descNode", "nTips", "start", 
       "end", "mid", "itersScaled", "itersRate", "itersDelta", 
       "itersKappa", "itersLambda", "pScaled", "pRate", "pDelta", "pKappa", 
       "pLambda", "nScalar", "nRate", "nDelta", "nKappa", "nLambda", 
       "nOrgnScalar", "nOrgnNRate", "nOrgnBRate", "nOrgnDelta", "nOrgnKappa", 
-      "nOrgnLambda", "rangeRate", "lqRate", "uqRate", "meanRate", "medianRate", 
+      "nOrgnLambda", "rangeRate", "meanRate", "medianRate", 
       "modeRate", "rangeDelta", "meanDelta", "medianDelta", "modeDelta",
       "rangeKappa", "meanKappa", "medianKappa", "modeKappa",
       "rangeLambda", "meanLambda", "medianLambda", "modeLambda", "species")
 
-  counts[ , "branch"] <- c(0:nrow(reftree$edge))
-  counts[ , "ancNode"] <- c(0, reftree$edge[ , 1])
-  counts[ , "descNode"] <- c((length(reftree$tip.label) + 1), 
-    reftree$edge[ , 2])
-  counts[ , "original_bl"] <- c(0, reftree$edge.length)
+    species_key <- vector(mode = "list", length = nrow(counts))
+    counts[ , "node_id"] <- names(species_key) <- 
+      paste0("node_", c(0:nrow(reftree$edge)))
+    counts[ , "branch"] <- c(0:nrow(reftree$edge))
 
-  hts <- phytools::nodeHeights(reftree)
-  hts <- round(abs(hts - max(hts)), 4)
-  counts[ , "start"] <- c(0, hts[ , 1])
-  counts[ , "end"] <- c(0, hts[ , 2])
-  counts <- as.data.frame(counts)
+    counts[ , "ancNode"] <- c(0, reftree$edge[ , 1])
+    counts[ , "descNode"] <- c((length(reftree$tip.label) + 1), 
+      reftree$edge[ , 2])
 
-  # Deal with the root
-  counts[1, 1] <- "root"
-  descs <- getDescs(reftree, node = counts[1, "descNode"])
-  counts[1, "nTips"] <- sum(descs <= length(reftree$tip.label))
-  counts[1, "mid"] <- 0
-  counts[1, "species"] <- paste0(reftree$tip.label[order(reftree$tip.label)], 
-    collapse = ",")
+    hts <- phytools::nodeHeights(reftree)
+    hts <- round(abs(hts - max(hts)), 4)
+    counts[ , "start"] <- c(0, hts[ , 1])
+    counts[ , "end"] <- c(0, hts[ , 2])
+    counts <- as.data.frame(counts)
 
-  for (i in 2:nrow(counts)) {
-    descs <- getDescs(reftree, node = counts[i, "descNode"])
-    counts[i, "nTips"] <- sum(descs <= length(reftree$tip.label))
-    if (counts[i, "nTips"] == 0) {
-      counts[i, "nTips"] <- 1
+    # Deal with the root
+    counts[1, 1] <- "root"
+    counts[1, 2] <- "root"
+    descs <- getDescs(reftree, node = counts[1, "descNode"])
+    counts[1, "nTips"] <- sum(descs <= length(reftree$tip.label))
+    counts[1, "mid"] <- 0
+    counts[1, "species"] <- paste0(reftree$tip.label[order(reftree$tip.label)], 
+      collapse = ",")
+
+    for (i in 2:nrow(counts)) {
+      descs <- phytools::getDescendants(reftree, 
+        node = as.numeric(counts[i, "descNode"])
+      )
+      counts[i, "nTips"] <- sum(descs <= length(reftree$tip.label))
+      # if (counts[i, "nTips"] == 1) {
+      #   counts[i, "nTips"] <- 1
+      # }
+      if (counts[i, "descNode"] <= length(reftree$tip.label)) {
+        counts[i, "species"] <- reftree$tip.label[descs]
+      } else {
+        tips <- descs[descs <= length(reftree$tip.label)]
+        tips <- reftree$tip.label[tips]
+        counts[i, "species"] <- paste0(sort(tips), collapse = ",")
+      }
+      counts[i, "mid"] <- mean(c(hts[(i - 1), 1], hts[(i - 1), 2]))
+      species_key[[i]]$nodes <- counts[i, 3:4]
+      species_key[[i]]$species <- strsplit(counts[i, "species"], ",")[[1]]
     }
-    if (counts[i, "descNode"] <= length(reftree$tip.label)) {
-      counts[i, "species"] <- reftree$tip.label[counts[i, "descNode"]]
-    } else {
-      tips <- getDescs(reftree, counts[i, "descNode"])
-      tips <- tips[tips <= length(reftree$tip.label)]
-      tips <- reftree$tip.label[tips]
-      counts[i, "species"] <- paste0(sort(tips), collapse = ",")
-    }
-    counts[i, "mid"] <- mean(c(hts[(i - 1), 1], hts[(i - 1), 2]))
-  }
-  
-  counts[ , c(14:52)] <- 0
-  return(counts)
+
+  counts <- counts[ , names(counts) != "species"]
+    
+  counts[ , c(9:45)] <- 0
+  return(list(counts = counts, species_key = species_key))
 }
 
 ##############################################################################
@@ -158,7 +167,8 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
   Node <- Branch <- Delta <- Lambda <- Kappa <- Node_effects <- replicate(
     nrow(counts), as.numeric(paste(.tmp)), simplify = FALSE
   )  
-  names(Node) <- names(Branch) <- names(Delta) <- names(Lambda) <- names(Kappa) <- names(Node_effects) <- counts[ , "descNode"]
+  names(Node) <- names(Branch) <- names(Delta) <- names(Lambda) <- 
+    names(Kappa) <- names(Node_effects) <- counts[ , "descNode"]
 
   print("Searching for scalars...")
     # I want to really turn this into a function so that I can use the 
@@ -237,47 +247,24 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 }
 
 ##############################################################################
-#' makeSpKey
-#' Detaches the species descendant from a node from the counts table and adds an
-#' id column to match to a species key list.
-#' @param counts The finished counts table.
-#' @name makeSpKey
-#' @keywords internal
-
-makeSpKey <- function(counts) {
-  species_key <- vector(mode = "list", length = nrow(counts))
-  counts$node_id <- names(species_key) <- paste0("node_", c(1:nrow(counts)))
-  
-  for (i in seq_along(species_key)) {
-    species_key[[i]]$nodes <- counts[i, 1:2]
-    species_key[[i]]$species <- strsplit(counts[i, "species"], ",")[[1]]
-  }
-
-  counts <- counts[ , names(counts) != "species"]
-  return(list(counts = counts, species_key = species_key))
-}
-
-##############################################################################
 #' rjpp
 #'
 #' A function that takes the output of a kappa, lambda, delta, VRates etc. RJ 
 #' bayesTraits run and runs post-processing on it.
 #' @param rjlog The RJ output of the run - typically suffixed with .VarRates.txt
+#' @param rjtrees 
 #' @param tree The time tree the analysis was run on as an object of class 
 #' "phylo", or the filename of the timetree.
 #' @param burnin The burnin (if required) for the mcmc (generally worked out 
 #' from the other logfile)
 #' @param thinning Thinning parameter for the MCMC output - again, worked out 
 #' from the raw MCMC output logfile.
-#' @param meanbranches If true, calculates mean, median and mode branch lengths 
-#' and returns mean tree.
-#' @param ratestable 
 #' @import phytools pbapply ape
 #' @export
 #' @name rjpp
 
 rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
-   ratestable = TRUE, verbose = TRUE) {
+   verbose = TRUE) {
   pbapply::pboptions(type = "timer", style = 3, char = "*")
 
   if (class(tree) == "phylo") {
@@ -334,12 +321,15 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   }
   
   fullmrcas <- data.frame(node = subtrees$node, mrca = fullmrcas) 
-  counts <- createCountsTable(reftree)
+  x <- createCountsTable(reftree)
+  counts <- x$counts
+  species_key <- x$species_key
 
   # Find the scalars.
   all_scalars <- scalarSearch(rj_output, counts, fullmrcas, verbose = verbose)
 
-  # Calculate cumulative node effects
+  # Calculate cumulative node effects. This involves propogating node scalars
+  # down all branches that descend from that node.
   for (i in 1:length(all_scalars$Node)) {
     .tmp <- multiplyNodes(all_scalars$Node[[i]], 
       names(all_scalars$Node)[i], 
@@ -348,10 +338,13 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     all_scalars$Node_effects[names(.tmp)] <- .tmp
   }
 
+  # And now multiply in any single-branch effects to get the cumulative linear
+  # rate change across the whole tree of node + branch scalars.
   all_scalars$Node_effects <- lapply(1:length(all_scalars$Node_effects), 
     function(x) all_scalars$Node_effects[[x]] * all_scalars$Branch[[x]])
   names(all_scalars$Node_effects) <- counts[ , "descNode"]
   
+  # The node effects object now becomes "rates".
   origins <- list(nodes = do.call(rbind, all_scalars$Node), 
                   branches = do.call(rbind, all_scalars$Branch), 
                   delta = do.call(rbind, all_scalars$Delta),
@@ -363,40 +356,36 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   alltypes <- unlist(all_scalars$alltypes)
   allmrcas <- unlist(all_scalars$allmrcas)
 
+  # This gives tables of the numbers of each types of scalar applied to each 
+  # node.
   bs <- table(unlist(allmrcas)[alltypes == "Branch"])
   ns <- table(unlist(allmrcas)[alltypes == "Node"])
   ds <- table(unlist(allmrcas)[alltypes == "Delta"])
   ks <- table(unlist(allmrcas)[alltypes == "Kappa"])
   ls <- table(unlist(allmrcas)[alltypes == "Lambda"])
 
+  # this gives vectors with T/F for whether each branch got a branch, node, 
+  # delta, kappa or lambda scalar. i.e. the TRUE in bstaxa is all taxa which
+  # had a branch scalar originate on them.
   bstaxa <- counts$descNode %in% names(bs)
   nstaxa <- counts$descNode %in% names(ns)
   dstaxa <- counts$descNode %in% names(ds)
   kstaxa <- counts$descNode %in% names(ks)
   lstaxa <- counts$descNode %in% names(ls)
 
-  counts$nOrgnBRate[bstaxa] <- bs[match(counts$descNode[bstaxa], names(bs))] 
-  counts$nOrgnScalar[bstaxa] <- counts$nOrgnBRate[bstaxa] + 
-  bs[match(counts$descNode[bstaxa], names(bs))] 
-  
+  # Now we want to count the number of origins of each scalar for each node.
+  counts$nOrgnBRate[bstaxa] <- bs[match(counts$descNode[bstaxa], names(bs))]
   counts$nOrgnNRate[nstaxa] <- ns[match(counts$descNode[nstaxa], names(ns))]
-  counts$nOrgnScalar[nstaxa] <- counts$nOrgnBRate[nstaxa] + 
-  ns[match(counts$descNode[nstaxa], names(ns))]
-  
   counts$nOrgnDelta[dstaxa] <- ds[match(counts$descNode[dstaxa], names(ds))]
-  counts$nOrgnScalar[dstaxa] <- counts$nOrgnBRate[dstaxa] + 
-  ds[match(counts$descNode[dstaxa], names(ds))]
-  
   counts$nOrgnKappa[kstaxa] <- ks[match(counts$descNode[kstaxa], names(ks))]
-  counts$nOrgnScalar[kstaxa] <- counts$nOrgnBRate[kstaxa] + 
-  ks[match(counts$descNode[kstaxa], names(ks))]
-  
   counts$nOrgnLambda[lstaxa] <- ls[match(counts$descNode[lstaxa], names(ls))]
-  counts$nOrgnScalar[lstaxa] <- counts$nOrgnBRate[lstaxa] + 
-  ls[match(counts$descNode[lstaxa], names(ls))]
-  
-  # Fill in transformation detail.
 
+  # Now add the number of scalar origins of ANY kind for each node. This is just
+  # the sum of all the other nOrgn* columns.
+  counts$nOrgnScalar <- counts$nOrgnBRate + counts$nOrgnNRate +
+    counts$nOrgnDelta + counts$nOrgnKappa + counts$nOrgnLambda
+
+  # Fill in transformation magnitude information.
   counts[ , "meanDelta"] <- rowMeans(origins$delta)
   counts[ , "medianDelta"] <- apply(origins$delta, 1, median)
   counts[ , "modeDelta"] <-  apply(origins$delta, 1, modeStat)
@@ -421,44 +410,41 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - 
     apply(origins$rates, 1, min))
 
-  # what is iters scaled meant to be? I THINK the number of iterations that the
-  # branch length is NOT the same as it's original branch length? This needs to
-  # be figured out with an example with both variable rates and another 
-  # transformation.
-  counts[ , "itersScaled"] <- NA
+  # Now sum the number of iterations a node is affected by a scalar. For
+  # transformations this is just the number of origins (or is it?!) and for
+  # rates is the number of iterations the branch length isn't equal to one.
   counts[ , "itersRate"] <- apply(origins$rates, 1, function(x) {
     sum(x != 1)
   })
   counts[ , "itersDelta"] <- counts[ , "nOrgnDelta"]
-  counts[ , "itersKappa"] <- counts[ , "nOrgnDelta"]
-  counts[ , "itersLambda"] <- counts[ , "nOrgnDelta"]
+  counts[ , "itersKappa"] <- counts[ , "nOrgnKappa"]
+  counts[ , "itersLambda"] <- counts[ , "nOrgnLambda"]
+  counts[ , "itersScaled"] <- counts[ , "itersRate"] + counts[ , "itersDelta"] +
+    counts[ , "itersKappa"] + counts[ , "itersLambda"]
 
-  # what is pscaled meant to be? Relate to itersScled
-  counts[ , "pScaled"] <- NA
-  counts[ , "pRate"] <- apply(origins$rates, 1, function(x) sum(x != 1)) / niter
+  # Now calculate the probability of being affected by a scaler.
+  counts[ , "pScaled"] <- counts[ , "itersScaled"] / niter
+  counts[ , "pRate"] <- counts[ , "itersRate"] / niter
   counts[ , "pDelta"] <- counts[ , "nOrgnDelta"] / niter
   counts[ , "pKappa"] <- counts[ , "nOrgnKappa"] / niter
   counts[ , "pLambda"] <- counts[ , "nOrgnLambda"] / niter
 
   # what is nscalar meant to be? The number of scalars effecting the branch?
-  counts[ , "nScalar"] <- NA
+  counts[ , "nScalar"] <- 0
   counts[ , "nRate"] <- counts[ , "nOrgnNRate"] + counts[ , "nOrgnBRate"]
   counts[ , "nDelta"] <- counts[ , "nOrgnDelta"]
-  counts[ , "nKappa"] <- counts[ , "nOrgnDelta"]
-  counts[ , "nLambda"] <- counts[ , "nOrgnDelta"]
+  counts[ , "nKappa"] <- counts[ , "nOrgnKappa"]
+  counts[ , "nLambda"] <- counts[ , "nOrgnLambda"]
 
   # The big table 100% needs to be a tibble, and so do each of the per-iteration
   # scalar origins. With that in mind, I think the whole thing needs to have a 
   # class
   # and a custom print method - it just makes the most sense.
 
-  counts <- counts[ , apply(counts, 2, function(x) all(x != 1))]
-  counts <- counts[ , apply(counts, 2, function(x) all(x != 0))]
-
-  tmp <- makeSpKey(counts)
-  counts <- tmp$counts
-  species_key <- tmp$species_key
-
+  counts <- counts[ , apply(counts, 2, function(x) !all(x == 1))]
+  counts <- counts[ , apply(counts, 2, function(x) !all(x == 0))]
+  
+  # make any origins that aren't in the model NULL.
   if (all(sapply(origins$delta, function(x) all(x == 1)))) {
     origins$delta <- NULL
   }

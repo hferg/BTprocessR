@@ -8,16 +8,23 @@
 #' @name getDescs
 #' @export
 
-getDescs <- function(tree, node, nds = NULL) {
+# something is wrong with this function - a) it seems to call itself (weird?!)
+# and b) it's returning some nodes with no tip-descendants, which should never
+# happen.
 
+getDescs <- function(tree, node, nds = NULL) {
+  # If more than one node is specified, find the MRCA of those nodes to get
+  # descendents from.
   if (length(node) > 1) {
     node <- getMRCA(tree, node)
   }
   
+  # make a nodes vector.
   if (is.null(nds)) {
     nds <- vector()
   }
-    
+  
+  # get the descendent
   dtrs <- tree$edge[which(tree$edge[ , 1] == node), 2]
   nds <- c(nds, dtrs)
   now <- which(dtrs >= length(tree$tip))
