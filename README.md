@@ -314,35 +314,27 @@ Most of the important information is returned in the first element of the output
   + nOrgnScalar: The number of scalars that _originate_ at this particular branch. This differs from nScalar due to linear rate scalars that operate on entire nodes rather than individual branches i.e. a rate scalar operating on a node will rate scale all descendent branches. In this case all descendent branches will receive +1 in nScalar, but only the node the scalar originates from will receive +1 in nOrgnScalar.
 
 * **Linear rate scalar information** i.e. when varrates is turned on.
-  + nRate: 
-  + pRate: 
-  + nOrgnNRate: 
-  + nOrgnBRate: 
-  + meanRate: 
-  + medianRate: 
-  + modeRate: 
-  + rangeRate: 
-  + sdRate: 
+  + nRate: The number of times the branch is affected by a linear rate scalar (_including_ the tipward effects of node scalars).
+  + pRate: The probability of a branch being affected by a linear rate scalar in the posterior (nRate / number of samples in the posterior. Again, including the tipward effects of node scalars).
+  + nOrgnNRate: The number of node scalars that originate at this particular node.
+  + nOrgnBRate: The number of branch scalars that originate at this particular node.
+  + meanRate: The mean rate scalar effecting this branch (including the tipward effects of node scalars).
+  + medianRate: The median rate scalar effecting this branch (including the tipward effects of node scalars).
+  + modeRate: The mode rate scalar effecting this branch (including the tipward effects of node scalars).
+  + rangeRate: The range of rate scalars effecting this branch (including the tipward effects of node scalars).
+  + sdRate: The standard deviation of rate scalars effecting this branch (including the tipward effects of node scalars).
 
-The first element "data" is a tibble that contains lots of information. Each row is a branch of the tree, as defined by ancestral (ancNode - note that node 0 is the root) and descendent (descNode). "nTips" is the number of tips desecendant from the descendant node of the branch, "start", "end" and "mid" are the start, end and midpoint of the branch on the time tree (in the same units as the time tree). Next is a variable number of columns depending on the transformations allowed in the model. Each column name is made up of a prefix denoting the data in the column, and a suffix denoting the transformation that the data is pertinent to. In MOST cases the transformations apply to a node, which is defined as the desecendent node of the ancestor-descendant pair (the only instance this doesn't apply is for branch rate scalars). 
-The prefixes are:
-iters - the number of the node/branch is affected by the suffixed transformation in the posterior 
-p - the probability the node/branch is affected by the suffixed transformation in the posterior (iters / total number of iterations)
-n - the number 
-nOrgn - the number of the suffixed transformations that originate at this node/branch
-range - the range in the magnitude of the suffixed transformation applied to this node/branch
-mean - the mean value of the suffixed transformations applied to this node/branch (note that this excludes samples when the branch receives no transformation)
-median - the median value of the suffixed transformations applied to this node/branch (note that this excludes samples when the branch receives no transformation)
-mode - the modal value of the suffixed transformations applied to this node/branch (note that this excludes samples when the branch receives no transformation)
+* **Transformations** Depending on the specific model this section will contain one or more of the following transformations: delta, kappa and/or lambda. Since the output for all transformations is identical for the purposes of this explanation the name of the transformation will be denoted with Trans. Due to the nature of transformations, especially nested transformations, there is no information on the tipward effects of transformations. Note that transformations are only ever applied to nodes, and not to individual branches.
+  + nTrans: The number of the particular transformation that originate at this node.
+  + pTrans: The probability of the transformation being applied to this node (nTrans / number of samples in the posterior).
+  + meanTrans: The mean value of the transformation applied to this node.
+  + medianTrans: The median value of the transformationa applied to this node.
+  + modeTrans: The modal value of teh transformation applied to this node.
+  + rangeTrans: The range of values of the transformation applied to this node.
+  + sdTrans: The standard deviation of the values of the transformation applied to this node.
+    + something else
 
-and the suffixes are:
-Scalar - denotes any/all scalars possible in the specified model.
-Rate - linear rate scalars
-Delta - delta transformations
-Lambda - lambda transforamtions
-Kappa - kappa transformations
-BRate - single branch linear rate scalars (i.e. only the branch is transformed)
-NRate - node linear rate scalars (i.e. the branch and all descendent branches are transformed)
+In addition to the scalars table the output has five further elements.
 
 
 ```r

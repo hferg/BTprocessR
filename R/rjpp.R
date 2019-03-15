@@ -450,14 +450,6 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   counts[ , "pKappa"] <- counts[ , "nKappa"] / niter
   counts[ , "pLambda"] <- counts[ , "nLambda"] / niter
 
-  # what is nscalar meant to be? The number of scalars effecting the branch?
-
-
-  # The big table 100% needs to be a tibble, and so do each of the per-iteration
-  # scalar origins. With that in mind, I think the whole thing needs to have a 
-  # class
-  # and a custom print method - it just makes the most sense.
-
   counts <- counts[ , apply(counts, 2, function(x) !all(x == 1))]
   counts <- counts[ , apply(counts, 2, function(x) !all(x == 0))]
   
@@ -486,6 +478,11 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     origins$rates <- NULL
   }
 
+  # add branch numbers and node IDs to the origins and rates tables.
+  for (i in seq_along(origins)) {
+    origins[[i]] <- cbind(counts[ , 1:2], origins[[i]])
+  }
+
   res <- list(
     scalars = tibble::as_tibble(counts), 
     tree_summary = tree_summary,
@@ -493,9 +490,8 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   )
 
   if (!is.null(origins$rates)) {
-    scalars <- list(rates = tibble::as_tibble(origins$rates))
     origins$rates <- NULL
-    res <- c(res, list(scalars = tibble::as_tibble(scalars)))
+    res <- c(res, list(scalars = tibble::as_tibble(origins$rates)))
   }
 
   origins <- lapply(origins, tibble::as_tibble)
