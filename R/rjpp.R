@@ -491,7 +491,7 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
 
   if (!is.null(origins$rates)) {
     origins$rates <- NULL
-    res <- c(res, list(scalars = tibble::as_tibble(origins$rates)))
+    res <- c(res, list(rates = tibble::as_tibble(origins$rates)))
   }
 
   origins <- lapply(origins, tibble::as_tibble)

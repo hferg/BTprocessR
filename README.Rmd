@@ -124,7 +124,11 @@ class(vrates_summary)
 names(vrates_summary)
 
 ```
-## The scalars table
+## The output of rjpp
+
+The rjpp function returns a list of six elements. These elements are detailed here...
+
+### scalars
 
 Most of the important information is returned in the first element of the output - a tibble called "scalars". The columns of this tibble break down into three main categories. These are general branch/node information, total scalar information and then (depending on which transformations were permitted in the model) linear rate scalars, delta transformations, kappa transformations and lambda transformations. Below is more detail on what each column contains.
 
@@ -162,9 +166,26 @@ Most of the important information is returned in the first element of the output
   + modeTrans: The modal value of teh transformation applied to this node.
   + rangeTrans: The range of values of the transformation applied to this node.
   + sdTrans: The standard deviation of the values of the transformation applied to this node.
-    + something else
 
-In addition to the scalars table the output has five further elements.
+### tree_summary
+
+This is the output of the tree_summary function (used above). It has two elements - the first containing four phylogenetic trees (the original tree, the mean tree, the median tree and the modal tree, all summarised from the posterior) and the second is a tibble detailing, for each branch, the original branch lengths, mean, median and modal branch lengths, the range of branch lengths across the posterior and the standard deviation of branch lengths in the posterior.
+
+### species_key
+
+This is a list of n elements, where n is the number of branches (edges) in the phylogeny. Each element describes a branch, and contains the ancestral and descendent node numbers (according to the standard node numbering of ape) and the species names of all species that descend from that node. The names of these elements correspond the the node_id column of the scalars table.
+
+### rates
+
+This table contains the linear rate scalar that is applied to each branch in each sample in the posterior. This is a n * (m + 2) tibble, where n is the number of branches in the tree + 1 (to account for the root) and m is the number of samples in the posterior (+2 to account for the two identification columns). The first two columns are the node_id (which corresponds to the scalars table and the species_key) and the branch number (corresponding to ape node numbering). Each subsequent column is one sample of the posterior. This table _includes_ the tipward effects of node scalars.
+
+### origins
+
+This is of tables named according to the transformations specified in the original model. If varrates was allowed it will contain two tables - nodes and branches - and then a table for any other transformation permitted in the model. As for the rates object, the first two columns in each are node_id and branch, and each column is a sample from the posterior. These are the specific values of the scalars applied to each branch (in the case of varrates) and node (in the case of varrates and other transforamtions). The difference between the branches and nodes tables here and the previous rates table is that these are simply the scalars that originate on a node or branch, and do not include the tipward effects.
+
+### niter
+
+The number of samples in the posterior (used by other functions - not that useful...)
 
 ```{r rjpp_twomods}
 # Some of this should be clearer with an example where two transformations are permitted.
