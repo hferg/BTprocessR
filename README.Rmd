@@ -124,6 +124,35 @@ class(vrates_summary)
 names(vrates_summary)
 
 ```
+## The scalars table
+
+Most of the important information is returned in the first element of the output - a tibble called "scalars". The columns of this tibble break down into three main categories. These are general branch/node information, total scalar information and then (depending on which transformations were permitted in the model) linear rate scalars, delta transformations, kappa transformations and lambda transformations. Below is more detail on what each column contains.
+
+* **General branch/node information.** Throughout the output here branches are defined by their ancestral and descendent node numbers. Nodes are defined by the branch leading to them. These node numbers (ancestral and descendent) are the equivalent to the numbering system assigned to a tree when read in using ape::read.nexus(). All trees are ladderized using ape::ladderize() to ensure numbering consistency, and so when using this output always use ape::ladderize() to ensure consistency.
+  + node_id: This is an ID that corresponds to the species names in the "species_key" element of the rjpp output.
+  + branch: This is the branch ID number, with the root named "root". This ought to correspond to the same numbering system ape uses to number nodes on the tree if the tree is ladderized.
+  + andNode: The ancestral node of the branch.
+  + descNode: The descendent node of the branch.
+  + nTips: The number of tips (terminal nodes) that descend from this particular branch/node.
+  + start: The time before present when the branch begins pre-transformations (according to the time scale of the original tree).
+  + end: The time before present when the branch ends pre-transformations (either bifurcates, or terminates).
+  + mid: The midpoint of the branch (time before present).
+
+* **Total scalar information**
+  + nScalar: The total number of scalars (of all types) that affect this branch.
+  + pScalar: The probability that this branch is affected by a scalar (nScalar / number of samples in posterior).
+  + nOrgnScalar: The number of scalars that _originate_ at this particular branch. This differs from nScalar due to linear rate scalars that operate on entire nodes rather than individual branches i.e. a rate scalar operating on a node will rate scale all descendent branches. In this case all descendent branches will receive +1 in nScalar, but only the node the scalar originates from will receive +1 in nOrgnScalar.
+
+* **Linear rate scalar information** i.e. when varrates is turned on.
+  + nRate: 
+  + pRate: 
+  + nOrgnNRate: 
+  + nOrgnBRate: 
+  + meanRate: 
+  + medianRate: 
+  + modeRate: 
+  + rangeRate: 
+  + sdRate: 
 
 The first element "data" is a tibble that contains lots of information. Each row is a branch of the tree, as defined by ancestral (ancNode - note that node 0 is the root) and descendent (descNode). "nTips" is the number of tips desecendant from the descendant node of the branch, "start", "end" and "mid" are the start, end and midpoint of the branch on the time tree (in the same units as the time tree). Next is a variable number of columns depending on the transformations allowed in the model. Each column name is made up of a prefix denoting the data in the column, and a suffix denoting the transformation that the data is pertinent to. In MOST cases the transformations apply to a node, which is defined as the desecendent node of the ancestor-descendant pair (the only instance this doesn't apply is for branch rate scalars). 
 The prefixes are:

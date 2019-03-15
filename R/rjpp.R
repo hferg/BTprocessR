@@ -82,16 +82,39 @@ loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 # and when a specific node is selected.
 
 createCountsTable <- function(reftree) {
-  counts <- matrix(ncol = 46, nrow = (nrow(reftree$edge) + 1))
-  colnames(counts) <- c("node_id", "branch", "ancNode", "descNode", "nTips", "start", 
-      "end", "mid", "itersScaled", "itersRate", "itersDelta", 
-      "itersKappa", "itersLambda", "pScaled", "pRate", "pDelta", "pKappa", 
-      "pLambda", "nScalar", "nRate", "nDelta", "nKappa", "nLambda", 
-      "nOrgnScalar", "nOrgnNRate", "nOrgnBRate", "nOrgnDelta", "nOrgnKappa", 
-      "nOrgnLambda", "rangeRate", "meanRate", "medianRate", 
-      "modeRate", "rangeDelta", "meanDelta", "medianDelta", "modeDelta",
-      "rangeKappa", "meanKappa", "medianKappa", "modeKappa",
-      "rangeLambda", "meanLambda", "medianLambda", "modeLambda", "species")
+  counts <- matrix(ncol = 42, nrow = (nrow(reftree$edge) + 1))
+  colnames(counts) <- c(
+    # identifying information
+    "node_id", "branch", "ancNode", "descNode", "nTips",
+    # branch length info
+    "start", "end", "mid",
+    # total scalar info
+    "nScalar", "pScalar", "nOrgnScalar",
+    # linear rate information
+    "nRate", "pRate", "nOrgnNRate", "nOrgnBRate", "meanRate", "medianRate", 
+    "modeRate", "rangeRate", "sdRate",
+    # delta info
+    "nDelta", "pDelta", "meanDelta", "medianDelta", "modeDelta",
+    "rangeDelta", "sdDelta",
+    # kappa info
+    "nKappa", "pKappa", "meanKappa", "medianKappa", "modeKappa",
+    "rangeKappa", "sdKappa",
+    #lambda info
+    "nLambda", "pLambda", "meanLambda", "medianLambda", "modeLambda",
+    "rangeLambda", "sdLambda",
+    # species - removed before returned to user
+    "species"
+  )
+
+  # notes.
+  # itersX and nX are effectively the same, except in the case of rates, where
+  # the number of rates breaks down into branch and node. That means I don't
+  # need the "iters" family of names.
+  # make sure to fill in SD for each scalar.
+  # equally I think the "origin" columns can be dropped - they are only there
+  # for the node and branch scalars. Instead I could have the measurements for
+  # node and branch scalars, and then the same for total scalar (the cumulative
+  # effect of all linear scalars.)
 
     species_key <- vector(mode = "list", length = nrow(counts))
     counts[ , "node_id"] <- names(species_key) <- 
@@ -139,7 +162,7 @@ createCountsTable <- function(reftree) {
 
   counts <- counts[ , names(counts) != "species"]
     
-  counts[ , c(9:45)] <- 0
+  counts[ , c(9:42)] <- 0
   return(list(counts = counts, species_key = species_key))
 }
 
@@ -376,14 +399,14 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   # Now we want to count the number of origins of each scalar for each node.
   counts$nOrgnBRate[bstaxa] <- bs[match(counts$descNode[bstaxa], names(bs))]
   counts$nOrgnNRate[nstaxa] <- ns[match(counts$descNode[nstaxa], names(ns))]
-  counts$nOrgnDelta[dstaxa] <- ds[match(counts$descNode[dstaxa], names(ds))]
-  counts$nOrgnKappa[kstaxa] <- ks[match(counts$descNode[kstaxa], names(ks))]
-  counts$nOrgnLambda[lstaxa] <- ls[match(counts$descNode[lstaxa], names(ls))]
+  counts$nDelta[dstaxa] <- ds[match(counts$descNode[dstaxa], names(ds))]
+  counts$nKappa[kstaxa] <- ks[match(counts$descNode[kstaxa], names(ks))]
+  counts$nLambda[lstaxa] <- ls[match(counts$descNode[lstaxa], names(ls))]
 
   # Now add the number of scalar origins of ANY kind for each node. This is just
   # the sum of all the other nOrgn* columns.
   counts$nOrgnScalar <- counts$nOrgnBRate + counts$nOrgnNRate +
-    counts$nOrgnDelta + counts$nOrgnKappa + counts$nOrgnLambda
+    counts$nDelta + counts$nKappa + counts$nLambda
 
   # Fill in transformation magnitude information.
   counts[ , "meanDelta"] <- rowMeans(origins$delta)
@@ -391,50 +414,44 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   counts[ , "modeDelta"] <-  apply(origins$delta, 1, modeStat)
   counts[ , "rangeDelta"] <- suppressWarnings(apply(origins$delta, 1, max) - 
     apply(origins$delta, 1, min))
+  counts[ , "sdDelta"] <- apply(origins$delta, 1, sd)
 
   counts[ , "meanKappa"] <- rowMeans(origins$kappa)
   counts[ , "medianKappa"] <- apply(origins$kappa, 1, median)
   counts[ , "modeKappa"] <- apply(origins$kappa, 1, modeStat)
   counts[ , "rangeKappa"] <- suppressWarnings(apply(origins$kappa, 1, max) - 
     apply(origins$kappa, 1, min))
+  counts[ , "sdKappa"] <- apply(origins$kappa, 1, sd)
 
   counts[ , "meanLambda"] <- rowMeans(origins$lambda)
   counts[ , "medianLambda"] <- apply(origins$lambda, 1, median)
   counts[ , "modeLambda"] <- apply(origins$lambda, 1, modeStat)
   counts[ , "rangeLambda"] <- suppressWarnings(apply(origins$lambda, 1, max) - 
     apply(origins$lambda, 1, min))
+  counts[ , "sdLambda"] <- apply(origins$lambda, 1, sd)
 
   counts[ , "meanRate"] <- rowMeans(origins$rates)
   counts[ , "medianRate"] <- apply(origins$rates, 1, median)
   counts[ , "modeRate"] <- apply(origins$rates, 1, modeStat)
   counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - 
     apply(origins$rates, 1, min))
+  counts[ , "sdRate"] <- apply(origins$rate, 1, sd)
 
-  # Now sum the number of iterations a node is affected by a scalar. For
-  # transformations this is just the number of origins (or is it?!) and for
-  # rates is the number of iterations the branch length isn't equal to one.
-  counts[ , "itersRate"] <- apply(origins$rates, 1, function(x) {
+  counts[ , "nRate"] <- apply(origins$rates, 1, function(x) {
     sum(x != 1)
   })
-  counts[ , "itersDelta"] <- counts[ , "nOrgnDelta"]
-  counts[ , "itersKappa"] <- counts[ , "nOrgnKappa"]
-  counts[ , "itersLambda"] <- counts[ , "nOrgnLambda"]
-  counts[ , "itersScaled"] <- counts[ , "itersRate"] + counts[ , "itersDelta"] +
-    counts[ , "itersKappa"] + counts[ , "itersLambda"]
+  counts[ , "nScalar"] <- counts[ , "nRate"] + counts[ , "nDelta"] +
+    counts[ , "nKappa"] + counts[ , "nLambda"]
 
   # Now calculate the probability of being affected by a scaler.
-  counts[ , "pScaled"] <- counts[ , "itersScaled"] / niter
-  counts[ , "pRate"] <- counts[ , "itersRate"] / niter
-  counts[ , "pDelta"] <- counts[ , "nOrgnDelta"] / niter
-  counts[ , "pKappa"] <- counts[ , "nOrgnKappa"] / niter
-  counts[ , "pLambda"] <- counts[ , "nOrgnLambda"] / niter
+  counts[ , "pScalar"] <- counts[ , "nScalar"] / niter
+  counts[ , "pRate"] <- counts[ , "nRate"] / niter
+  counts[ , "pDelta"] <- counts[ , "nDelta"] / niter
+  counts[ , "pKappa"] <- counts[ , "nKappa"] / niter
+  counts[ , "pLambda"] <- counts[ , "nLambda"] / niter
 
   # what is nscalar meant to be? The number of scalars effecting the branch?
-  counts[ , "nScalar"] <- 0
-  counts[ , "nRate"] <- counts[ , "nOrgnNRate"] + counts[ , "nOrgnBRate"]
-  counts[ , "nDelta"] <- counts[ , "nOrgnDelta"]
-  counts[ , "nKappa"] <- counts[ , "nOrgnKappa"]
-  counts[ , "nLambda"] <- counts[ , "nOrgnLambda"]
+
 
   # The big table 100% needs to be a tibble, and so do each of the per-iteration
   # scalar origins. With that in mind, I think the whole thing needs to have a 
@@ -470,7 +487,7 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   }
 
   res <- list(
-    data = tibble::as_tibble(counts), 
+    scalars = tibble::as_tibble(counts), 
     tree_summary = tree_summary,
     species_key = species_key
   )
