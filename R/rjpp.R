@@ -505,6 +505,12 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   return(res)
 }
 
+# NEW PLAN.
+# If there is a custom print method for the output of rjpp, then I can have some
+# outputs in the rjpp output which can be some tables of the information 
+# required to plot the shifts and whatnot - then I just need to have some custom
+# plot methods for the rjpp output - I think this is definitely worth trying...
+
 
 #' summariseRjpp
 #' This functions takes the somewhat massive output of the rjpp function and

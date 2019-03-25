@@ -150,4 +150,56 @@ smartBind <- function (...) {
   out
 }
 
+#' makeTrans
+#'
+#' Some function from stack exchange that makes a colour transparent according 
+#' to a given alpha.
+#' @param alpha The alpha required.
+#' @name makeTrans
+#' @export
 
+makeTrans <- function(..., alpha=0.5) {
+  if(alpha<0 | alpha>1) {
+    stop("alpha must be between 0 and 1")
+  }
+ 
+  alpha <- floor(255*alpha) 
+  newColor <- col2rgb(col=unlist(list(...)), alpha=FALSE)
+
+  .makeTrans <- function(col, alpha) {
+    rgb(red=col[1], green=col[2], blue=col[3], alpha=alpha, maxColorValue=255)
+  }
+
+  newColor <- apply(newColor, 2, .makeTrans, alpha=alpha)
+  return(newColor)
+}
+
+#' plotPhylo
+#'
+#' A silly little function that makes plotting a tree without tip labels and with
+#' an axis easier and quicker.
+#' @param tree An object of class phylo
+#' @param tips Logical - show tip labels or not?
+#' @param nodes TRUE shows all node labels, FALSE supresses node labels 
+#' (default), or a vecotr of which nodes to highlight.
+#' @param nodecex Scaling factor for node labels.
+#' @param scale Logical - show the scale bar, or not?
+#' @param ... Generic plot arguments (edge.width, edge.cols etc.)
+#' @name plotPhylo
+#' @export
+
+plotPhylo <- function(tree, tips = FALSE, nodes = NULL, nodecex = NULL, 
+  scale = TRUE, ...) {
+  plot(tree, show.tip.label = tips, ...)
+  if (!is.null(nodes)) {
+    if (is.numeric(nodes)) {
+      ape::nodelabels(node = nodes, cex = cex)
+    } else if (nodes == FALSE) {}
+    else {
+      ape::nodelabels(cex = nodecex)
+    }
+  }
+  if (scale) {
+    ape::axisPhylo()
+  }
+}

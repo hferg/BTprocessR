@@ -4,19 +4,28 @@
 #' @name rateShifts
 #' @keywords internal
 rateShifts <- function(PP, threshold, gradientcols, colour) {
-  percscaled <- apply(PP$scalars[[1]][2:nrow(PP$scalars[[1]]), ], 1, function(x) sum(x != 1)) / PP$niter
+  percscaled <- apply(
+    PP$scalars[[1]][2:nrow(PP$scalars[[1]]), ],
+    1, function(x) sum(x != 1)
+  ) / PP$niter
 
   if (threshold == 0) {
-    edge.cols <- plotrix::color.scale(percscaled, extremes = gradientcols, na.color = NA)
+    edge.cols <- plotrix::color.scale(
+      percscaled,
+      extremes = gradientcols,
+      na.color = NA)
 
   } else if (threshold > 0) {
     nodes <- as.numeric(names(percscaled[percscaled >= threshold]))
     edge.cols <- rep("black", nrow(PP$meantree$edge))
     edge.cols[PP$meantree$edge[ , 2] %in% nodes] <- colour
   } else if (threshold == "relative") {
-    edge.cols <- plotrix::color.scale(log(PP$data$meanRate[2:nrow(PP$data)]), extremes = gradientcols, na.color = NA)
+    edge.cols <- plotrix::color.scale(
+      log(PP$data$meanRate[2:nrow(PP$data)]),
+      extremes = gradientcols,
+      na.color = NA)
   }
-  return(edge.cols)  
+  return(edge.cols)
 }
 
 ##############################################################################
@@ -26,7 +35,7 @@ rateShifts <- function(PP, threshold, gradientcols, colour) {
 #' @name transShifts
 #' @keywords internal
 
-transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans, 
+transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
   nodescaling, colour, nodecex) {
   if (threshold == "relative") {
     stop("Relative threshold not valid for total rate scalars.")
@@ -35,12 +44,14 @@ transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
   if (threshold == 0) {
     threshold <- 1 / PP$niter
   }
-  
-  
-  nodes <- PP$data$descNode[which((PP$data[ , cl] / PP$niter) >= threshold)]
-  
 
-  pprobs <- PP$data[which((PP$data[ , cl] / PP$niter) >= threshold) , cl] / PP$niter
+  nodes <- PP$scalars$descNode[which(
+    (PP$scalars[ , cl] / PP$niter) >= threshold
+  )]
+
+  pprobs <- PP$scalars[which(
+    (PP$scalars[ , cl] / PP$niter) >= threshold
+  ) , cl] / PP$niter
 
   if (length(nodes) == 0) {
     stop("No scalars above threshold.")
@@ -58,12 +69,14 @@ transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
     }
   }
 
-  col <- vector(mode = "character", length = length(nodes))  
+  col <- vector(mode = "character", length = length(nodes))
 
-  col <- sapply(1:length(alphas), 
+  col <- sapply(1:length(alphas),
     function(x) makeTrans(colour = colour, alpha = alphas[x]))
 
   if (nodescaling) {
+    # I think I need to rescale nodecex so that the max is 1? That way there
+    # will always be something plotted...
     nodecex = nodecex * pprobs
   }
 
@@ -71,37 +84,63 @@ transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
     nodes <- which(tree$edge[ , 2] %in% nodes)
   }
 
-  list(nodes = nodes, colours = col, alphas = alphas, nodecex = nodecex)
+  list(nodes = as.numeric(nodes), 
+    colours = col, 
+    alphas = alphas, 
+    nodecex = as.numeric(nodecex[, 1]))
 }
 
 ################################################################################
 #' plotShifts
-#' 
-#' Plots the locations of the origins of scalars from the postprocessor output of bayestraits.
+#'
+#' Plots the locations of the origins of scalars from the postprocessor output
+#' of bayestraits.
 #' CURRENTLY WORKS ONLY FOR DELTAS.
 #' @param PP The psotprocessor (localscalrPP) output.
-#' @param scalar The scalar to find and plot from the post processor - delta/lambda/kappa/node/branch
-#' @param threshold Threshold of probability in posterior to display deltas for, defaults to zero (i.e. shows all deltas shaded proportionally to the posterior probability)
+#' @param scalar The scalar to find and plot from the post processor -
+#' delta/lambda/kappa/node/branch
+#' @param threshold Threshold of probability in posterior to display deltas for,
+#' defaults to zero (i.e. shows all deltas shaded proportionally to the
+#' posterior probability)
 #' @param colour The colour to use for the node circles
-#' @param scaled Plot the original tree (scaled = "time", the default), or the mean/sclaed tree (scaled = "mean") or plot the tree scaled only by scalars present above the threshold (scaled = "threshold")?
+#' @param scaled Plot the original tree (scaled = "time", the default), or the
+#' mean/sclaed tree (scaled = "mean") or plot the tree scaled only by scalars
+#' present above the threshold (scaled = "threshold")?
 #' @param nodecex The scaling factor for the size of the node circles
 #' @param tips Show tip labels?
 #' @param scalebar Include scale bar?
-#' @param measure When plotting "siginficant" tree, what measure of the parameter? Median (default), mode or mean.
-#' @param exludeones If plotting according to a threshold of significance, should 1s (i.e. no scalar) be excluded from the posterior when calculating average scalar?
-#' @param relativetrans If TRUE (defaults to FALSE) the scale of transparency will go from the threshold (totally transparent) to the maximum presence (full opacity).
-#' @param nodescaling Scale node symbols according to posterior probability of shift (default).
-#' @param transparency Adjust node symbol transparency according to posterior probability? Defaults to FALSE.
-#' @param gradientcols A vector of two colours - the min and max colours used when colouring the tree according to percentage time rate scaled (when threshold = 0) or using rate.edges.
-#' @param rate.edges Takes a numeric value between 0 and 1. If NULL (default) then node shapes are plotted for a transformation. If equal to zero then node shapes are plotted along with a colour gradient on the branches for rates (if in the posterior), and if set to a threshold then the branches are coloured black/red for whether there is a scalar over the threshold (red) along with node scalars.
+#' @param measure When plotting "siginficant" tree, what measure of the
+#' parameter? Median (default), mode or mean.
+#' @param exludeones If plotting according to a threshold of significance,
+#' should 1s (i.e. no scalar) be excluded from the posterior when calculating
+#' average scalar?
+#' @param relativetrans If TRUE (defaults to FALSE) the scale of transparency
+#' will go from the threshold (totally transparent) to the maximum presence
+#' (full opacity).
+#' @param nodescaling Scale node symbols according to posterior probability of
+#' shift (default).
+#' @param transparency Adjust node symbol transparency according to posterior
+#' probability? Defaults to FALSE.
+#' @param gradientcols A vector of two colours - the min and max colours used
+#' when colouring the tree according to percentage time rate scaled (when
+#' threshold = 0) or using rate.edges.
+#' @param rate.edges Takes a numeric value between 0 and 1. If NULL (default)
+#' then node shapes are plotted for a transformation. If equal to zero then node
+#' shapes are plotted along with a colour gradient on the branches for rates (if
+#' in the posterior), and if set to a threshold then the branches are coloured
+#' black/red for whether there is a scalar over the threshold (red) along with
+#' node scalars.
 #' @param shp The shape of the node markers (uses the usual pch index).
 #' @name plotShifts
 #' @import plotrix
 #' @export
-#' 
-plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2, scaled = "time", scalebar = TRUE,
-  measure = "median", excludeones = FALSE, relativetrans = FALSE, nodescaling = TRUE, 
-  transparency = FALSE, gradientcols = c("dodgerblue", "firebrick1"), rate.edges = NULL, 
+
+# I think there might be too many options here - what is actually useful?!
+
+plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2,
+  scaled = "time", scalebar = TRUE, measure = "median", excludeones = FALSE,
+  relativetrans = FALSE, nodescaling = TRUE, transparency = FALSE,
+  gradientcols = c("dodgerblue", "firebrick1"), rate.edges = NULL,
   colour = "red", colour2 = "green",  shp = 21, tips = FALSE, ...) {
 
   if (scalar == "delta") {
@@ -126,18 +165,15 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2, s
     cl <- c("nOrgnNRate", "nOrgnBRate")
     mode <- "doubletrans"
   }
-  
+
   if (scaled == "time") {
-    tree <- PP$meantree
-    tree$edge.length <- PP$data$orgBL[2:nrow(PP$data)]
+    tree <- PP$tree_summary$tree_summaries$original_tree
   } else if (scaled == "mean") {
-      tree <- PP$meantree
+    tree <- PP$tree_summary$tree_summaries$mean_tree
   } else if (scaled == "median") {
-    tree <- PP$meantree
-    tree$edge.length <- PP$data$medianBL[2:nrow(PP$data)]
+    tree <- PP$tree_summary$tree_summaries$median_tree
   } else if (scaled == "mode") {
-    tree <- PP$meantree
-    tree$edge.length <- PP$data$modeBL[2:nrow(PP$data)]
+    tree <- PP$tree_summary$tree_summaries$mode_tree
   } else if (scaled == "threshold") {
     if (mode == "rate") {
       tree <- tree
@@ -153,9 +189,18 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2, s
       try(if(is.null(PP$scalars)) stop("No rate scalars in posterior output."))
       edge.cols <- rateShifts(PP, threshold = rate.edges, gradientcols, colour)
     }
-    
-    node_info <- transShifts(PP, threshold, cl, tree, transparency, relativetrans,
-      nodescaling, colour, nodecex)
+
+    node_info <- transShifts(
+      PP,
+      threshold,
+      cl,
+      tree,
+      transparency,
+      relativetrans,
+      nodescaling,
+      colour,
+      nodecex
+    )
 
   } else if (mode == "doubletrans") {
     edge.cols <- "black"
@@ -164,30 +209,48 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2, s
       try(if(is.null(PP$scalars)) stop("No rate scalars in posterior output."))
       edge.cols <- rateShifts(PP, threshold = rate.edges, gradientcols, colour)
     }
-    
-    node_info <- transShifts(PP, threshold, cl[1], tree, transparency, relativetrans,
-      nodescaling, colour, nodecex)
 
-    branch_info <- transShifts(PP, threshold2, cl[2], tree, transparency, relativetrans,
-      nodescaling, colour2, nodecex)   
+    node_info <- transShifts(
+      PP,
+      threshold,
+      cl[1],
+      tree,
+      transparency,
+      relativetrans,
+      nodescaling,
+      colour,
+      nodecex
+    )
+
+    branch_info <- transShifts(
+      PP,
+      threshold2,
+      cl[2],
+      tree,
+      transparency,
+      relativetrans,
+      nodescaling,
+      colour2,
+      nodecex
+    )
 
   } else if (mode == "rate") {
     edge.cols <- rateShifts(PP, threshold, gradientcols, colour)
   }
 
   plotPhylo(tree, tips = tips, edge.col = edge.cols, scale = scalebar, ...)
-  
+
   if (scalar != "rate") {
     if (scalar == "branch") {
-      edgelabels(edge = node_info$nodes, bg = node_info$col, 
+      edgelabels(edge = node_info$nodes, bg = node_info$col,
         pch = shp, cex = node_info$nodecex)
     } else if (scalar == "nodebranch") {
-      nodelabels(node = node_info$nodes, bg = node_info$col, 
+      nodelabels(node = node_info$nodes, bg = node_info$col,
         pch = shp, cex = node_info$nodecex)
-      edgelabels(edge = branch_info$nodes, bg = branch_info$col, 
+      edgelabels(edge = branch_info$nodes, bg = branch_info$col,
         pch = shp, cex = branch_info$nodecex)
     } else {
-      nodelabels(node = node_info$nodes, bg = node_info$col, 
+      ape::nodelabels(node = node_info$nodes, bg = node_info$col,
         pch = shp, cex = node_info$nodecex)
     }
   }
@@ -195,10 +258,10 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2, s
 
 
 # I think that actually the way to go here is to use the RJPP output to generate
-# the info for the plot. THEN have a class for that object, and then have a 
+# the info for the plot. THEN have a class for that object, and then have a
 # plot method for it.
 
 # this would also solve the problem of the RJPP table being absurd - there would
 # be a "summarise RJPP" type of function that reduces the table down to the
-# specific interests of the user, which also returns the edge labels, colours 
+# specific interests of the user, which also returns the edge labels, colours
 # and transparencies that will be needed to plot that object.
