@@ -4,8 +4,9 @@
 #' @name rateShifts
 #' @keywords internal
 rateShifts <- function(PP, threshold, gradientcols, colour) {
+  
   percscaled <- apply(
-    PP$scalars[[1]][2:nrow(PP$scalars[[1]]), ],
+    PP$rates[[1]][2:nrow(PP$scalars[[1]]), ],
     1, function(x) sum(x != 1)
   ) / PP$niter
 

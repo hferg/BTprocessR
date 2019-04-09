@@ -177,7 +177,7 @@ This is a list of n elements, where n is the number of branches (edges) in the p
 
 ### rates
 
-This table contains the linear rate scalar that is applied to each branch in each sample in the posterior. This is a n * (m + 2) tibble, where n is the number of branches in the tree + 1 (to account for the root) and m is the number of samples in the posterior (+2 to account for the two identification columns). The first two columns are the node_id (which corresponds to the scalars table and the species_key) and the branch number (corresponding to ape node numbering). Each subsequent column is one sample of the posterior. This table _includes_ the tipward effects of node scalars.
+This table contains the linear rate scalar that is applied to each branch in each sample in the posterior (the effects of both node scalars and branch scalars). This is a n * (m + 2) tibble, where n is the number of branches in the tree + 1 (to account for the root) and m is the number of samples in the posterior (+2 to account for the two identification columns). The first two columns are the node_id (which corresponds to the scalars table and the species_key) and the branch number (corresponding to ape node numbering). Each subsequent column is one sample of the posterior. This table _includes_ the tipward effects of node scalars.
 
 ### origins
 

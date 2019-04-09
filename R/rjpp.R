@@ -490,7 +490,6 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   )
 
   if (!is.null(origins$rates)) {
-    origins$rates <- NULL
     res <- c(res, list(rates = tibble::as_tibble(origins$rates)))
   }
 
@@ -531,3 +530,10 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
 summariseRjpp <- function(PP, scalar) {
 
 }
+
+
+
+## TODO
+# for some reason rates is empty, even from a variable rates analysis. This
+# shouldn't be - this should contain the per-branch rates, surely?! Check!
+
