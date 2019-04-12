@@ -3,31 +3,49 @@
 #' Generates the edge colours to colour edges by total rate.
 #' @name rateShifts
 #' @keywords internal
-rateShifts <- function(PP, threshold, gradientcols, colour) {
-  
-  percscaled <- apply(
-    PP$rates[[1]][2:nrow(PP$scalars[[1]]), ],
-    1, function(x) sum(x != 1)
-  ) / PP$niter
+rateShifts <- function(PP, threshold, colour, stat = "mean") {
+  tree <- PP$tree_summary$tree_summaries$original_tree
+  percscaled <- PP$scalars$pRate[2:nrow(PP$scalars)]
+  names(percscaled) <- PP$scalars$branch[2:nrow(PP$scalars)]
 
   if (threshold == 0) {
     edge.cols <- plotrix::color.scale(
       percscaled,
-      extremes = gradientcols,
+      extremes = viridis::viridis(9),
       na.color = NA)
-
+    scale.cols <- plotrix::color.scale(
+      sort(percscaled),
+      extremes = viridis::viridis(9),
+      na.color = NA)
   } else if (threshold > 0) {
     nodes <- as.numeric(names(percscaled[percscaled >= threshold]))
-    edge.cols <- rep("black", nrow(PP$meantree$edge))
-    edge.cols[PP$meantree$edge[ , 2] %in% nodes] <- colour
+    edge.cols <- rep("black", nrow(tree$edge))
+    edge.cols[tree$edge[ , 2] %in% nodes] <- viridis::viridis(5)[[4]]
   } else if (threshold == "relative") {
+    # I think I need to standardise here - so after logging the values run
+    # 0 to 1?
+
+    if (stat == "mean") {
+      xx <- log(PP$scalars$meanRate[2:nrow(PP$scalars)])
+    } else if (stat == "median") {
+      xx <- log(PP$scalars$medianRate[2:nrow(PP$scalars)])
+    }
     edge.cols <- plotrix::color.scale(
-      log(PP$data$meanRate[2:nrow(PP$data)]),
-      extremes = gradientcols,
+      log(PP$scalars$meanRate[2:nrow(PP$scalars)]),
+      extremes = viridis::viridis(9),
+      na.color = NA)
+    scale.cols <- plotrix::color.scale(
+      sort(log(PP$scalars$meanRate[2:nrow(PP$scalars)])),
+      extremes = viridis::viridis(9),
       na.color = NA)
   }
   return(edge.cols)
 }
+
+#
+plot(tree, show.tip.label = FALSE, edge.col = edge.cols, edge.width = 2)
+# edge.cols isn't right - I need the actual gradient and values...
+plotrix::color.legend(0, 0, 10, 5, c("slow", "fast"), scale.cols)
 
 ##############################################################################
 #' transShifts
