@@ -5,7 +5,7 @@
 \title{rateShifts
 Generates the edge colours to colour edges by total rate.}
 \usage{
-rateShifts(PP, threshold, gradientcols, colour)
+rateShifts(PP, threshold, colour, stat = "mean", plot.options = list())
 }
 \description{
 rateShifts

@@ -1,80 +1,229 @@
 ##############################################################################
-#' rateShifts
-#' Generates the edge colours to colour edges by total rate.
-#' @name rateShifts
+#' getPalette
+#' Generate the palette for colour ramps.
+#' @name getPalette
 #' @keywords internal
-rateShifts <- function(PP, threshold, colour, stat = "mean") {
-  tree <- PP$tree_summary$tree_summaries$original_tree
-  percscaled <- PP$scalars$pRate[2:nrow(PP$scalars)]
-  names(percscaled) <- PP$scalars$branch[2:nrow(PP$scalars)]
-
-  if (threshold == 0) {
-    edge.cols <- plotrix::color.scale(
-      percscaled,
-      extremes = viridis::viridis(9),
-      na.color = NA)
-    scale.cols <- plotrix::color.scale(
-      sort(percscaled),
-      extremes = viridis::viridis(9),
-      na.color = NA)
-  } else if (threshold > 0) {
-    nodes <- as.numeric(names(percscaled[percscaled >= threshold]))
-    edge.cols <- rep("black", nrow(tree$edge))
-    edge.cols[tree$edge[ , 2] %in% nodes] <- viridis::viridis(5)[[4]]
-  } else if (threshold == "relative") {
-    # I think I need to standardise here - so after logging the values run
-    # 0 to 1?
-
-    if (stat == "mean") {
-      xx <- log(PP$scalars$meanRate[2:nrow(PP$scalars)])
-    } else if (stat == "median") {
-      xx <- log(PP$scalars$medianRate[2:nrow(PP$scalars)])
-    }
-    edge.cols <- plotrix::color.scale(
-      log(PP$scalars$meanRate[2:nrow(PP$scalars)]),
-      extremes = viridis::viridis(9),
-      na.color = NA)
-    scale.cols <- plotrix::color.scale(
-      sort(log(PP$scalars$meanRate[2:nrow(PP$scalars)])),
-      extremes = viridis::viridis(9),
-      na.color = NA)
+getPalette <- function(opts) {
+  if (opts$palette == "viridis") {
+    pal <- viridis::viridis(9)
+  } else if (opts$palette == "plasma") {
+    pal <- viridis::plasma(9)
+  } else if (opts$palette == "magma") {
+    pal <- viridis::magma(9)
+  } else if (opts$palette == "cividis") {
+    pal <- viridis::cividis(9)
+  } else {
+    pal <- tryCatch({
+      gplots::col2hex(opts$palette)
+    },
+    error = function(e) {
+      message("Palette contains invalid colour names:")
+      message(e)
+    })
   }
-  return(edge.cols)
+  return(pal)
 }
 
-#
-plot(tree, show.tip.label = FALSE, edge.col = edge.cols, edge.width = 2)
-# edge.cols isn't right - I need the actual gradient and values...
-plotrix::color.legend(0, 0, 10, 5, c("slow", "fast"), scale.cols)
+##############################################################################
+#' generateTrans
+#' Generate the transparencies from data and colours
+#' @name getPalette
+#' @keywords internal
+generateTrans <- function(cols, values) {
+  tt <- values / max(values)
+  cols <- sapply(seq_along(cols), function(x) {
+    makeTrans(cols[x], alpha = tt[x])
+  })
+  return(cols)
+}
 
 ##############################################################################
-#' transShifts
-#' Generates the node labels, edge.colours and transparencies to plot the
-#' location of transformations in a posterior.
-#' @name transShifts
+#' branchColours
+#' Generates the edge colours to colour edges by total rate.
+#' @name branchColours
 #' @keywords internal
-
-transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
-  nodescaling, colour, nodecex) {
-  if (threshold == "relative") {
-    stop("Relative threshold not valid for total rate scalars.")
+branchColours <- function(PP, opts) {
+  # generate data for colour scale
+  if (opts$branch.colour == "mean") {
+    xx <- log(PP$scalars$meanRate[2:nrow(PP$scalars)])
+  } else if (opts$branch.colour == "median") {
+    xx <- log(PP$scalars$medianRate[2:nrow(PP$scalars)])
+  } else if (opts$branch.colour == "mode") {
+    xx <- log(PP$scalars$modeRate[2:nrow(PP$scalars)])
+  } else if (opts$branch.colour == "sd") {
+    xx <- PP$scalars$sdRate[2:nrow(PP$scalars)]
+  } else if (opts$branch.colour == "scale_pc") {
+    xx <- PP$scalars$pRate[2:nrow(PP$scalars)]
   }
 
-  if (threshold == 0) {
+  # define palette
+  pal <- getPalette(opts)
+
+  # now generate edge.colours, if needed.
+  if (opts$branch.colour != "none") {
+    edge.cols <- plotrix::color.scale(xx, extremes = pal, na.color = NA)
+    ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
+    scale.cols <- plotrix::color.scale(ss, extremes = pal, na.color = NA)
+  } else if (opts$branch.colour == "none") {
+    edge.cols <- rep("black", length(xx))
+    scale.cols <- NA
+  }
+
+  # apply transparency, if needed.
+  if (opts$branch.transparency == "scale_pc") {
+    edge.cols <- generateTrans(edge.cols, PP$scalars$pRate[2:nrow(PP$scalars)])
+  } else if (opts$branch.transparency == "mean") {
+    edge.cols <- generateTrans(edge.cols, 
+      log(PP$scalars$meanRate[2:nrow(PP$scalars)]))
+  } else if (opts$branch.transparency == "median") {
+    edge.cols <- generateTrans(edge.cols, 
+      log(PP$scalars$medianRate[2:nrow(PP$scalars)]))
+  } else if (opts$branch.transparency == "mode") {
+    edge.cols <- generateTrans(edge.cols, 
+      log(PP$scalars$modeRate[2:nrow(PP$scalars)]))
+  } else if (opts$branch.transparency == "sd") {
+    edge.cols <- generateTrans(edge.cols, PP$scalars$sdRate[2:nrow(PP$scalars)])
+  }
+
+  # identify un-coloured nodes if needed.
+  if (opts$coloured.branches == "threshold") {
+    tree <- PP$tree_summary$tree_summaries$original_tree
+    percs <- PP$scalars$pRate[2:nrow(PP$scalars)]
+    names(percs) <- PP$scalars$branch[2:nrow(PP$scalars)]
+    nodes <- as.numeric(names(percs[percs < opts$threshold]))
+    null_edges <- tree$edge[, 2] %in% nodes
+  }
+
+  # turn off colours if coloured.branches == "threshold"
+  # i.e. set the na colour.
+  if (opts$branch.col != "none" && opts$coloured.branches == "threshold") {
+    edge.cols[null_edges] <- opts$na.colour
+  }
+  return(list(edge.cols = edge.cols, scale.cols = scale.cols))
+}
+
+##############################################################################
+#' nodeShapes
+#' Generates the node labels, edge.colours and transparencies to plot the
+#' location of transformations in a posterior.
+#' @name nodeShapes
+#' @keywords internal
+
+nodeShapes <- function(PP, opts, mode) {
+  
+  # old arguments - threshold, cl, tree, transparency, relativetrans,
+  # nodescaling, colour, nodecex
+
+  # if threshold is zero, make the threshold the minimum threshold - this means
+  # that nodes that never get a scalar don't get a little circle plotted on
+  # them!
+  if (opts$threshold == 0) {
     threshold <- 1 / PP$niter
   }
 
-  nodes <- PP$scalars$descNode[which(
-    (PP$scalars[ , cl] / PP$niter) >= threshold
-  )]
+  # get correct information
+  if (opts$transformation == "rates") {
+    if (mode == "branches") {
+      brates <- PP$origins$branches[ , 3:ncol(PP$origins$branches)]
+      pS <- PP$scalars$nOrgnBRate / PP$niter
+      pVmean <- rowMeans(brates)
+      pVmedian <- apply(brates, 1, median)
+      pVmode <- apply(brates, 1, modeStat)
+      pVsd <- apply(brates, 1, sd)
+    } else if (mode == "nodes") {
+      nrates <- PP$origins$nodes[ , 3:ncol(PP$origins$nodes)]
+      pS <- PP$scalars$nOrgnNRate / PP$niter
+      pVmean <- rowMeans(nrates)
+      pVmedian <- apply(nrates, 1, median)
+      pVmode <- apply(nrates, 1, modeStat)
+      pVsd <- apply(nrates, 1, sd)
+    }
+  } else if (opts$transformation == "delta") {
+    pS <- PP$scalars$pDelta
+    pVmean <- log(PP$scalars$meanDelta)
+    pVmedian <- log(PP$scalars$medianDelta)
+    pVmode <- log(PP$scalars$modeDelta)
+    pVsd <- PP$scalars$sdDelta
+  } else if (opts$transformation == "lambda") {
+    pS <- PP$scalars$pLambda
+    pVmean <- log(PP$scalars$meanLambda)
+    pVmedian <- log(PP$scalars$medianLambda)
+    pVmode <- log(PP$scalars$modeLambda)
+    pVsd <- PP$scalars$sdDelta
+  } else if (opts$transformation == "kappa") {
+    pS <- PP$scalars$pKappa
+    pVmean <- log(PP$scalars$meanKappa)
+    pVmedian <- log(PP$scalars$medianKappa)
+    pVmode <- log(PP$scalars$modeKappa)
+    pVsd <- PP$scalars$sdKappa
+  }
 
-  pprobs <- PP$scalars[which(
-    (PP$scalars[ , cl] / PP$niter) >= threshold
-  ) , cl] / PP$niter
+  # find nodes that get labels.
+  node_tf <- pS > threshold
+  nodes <- PP$scalars$descNode[node_tf]
+
+  # come back to this... what is it asking?!
 
   if (length(nodes) == 0) {
     stop("No scalars above threshold.")
   }
+
+  if (opts$nb.colour != "none") {
+    pal <- getPalette(opts)
+    makeCols <- function(xx, pal) {
+      cols <- plotrix::color.scale(xx, extremes = pal, 
+        na.color = NA)
+      ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
+      scale.cols <- plotrix::color.scale(ss, extremes = pal, na.color = NA)
+      return(list(cols = cols, scale.cols = scale.cols))
+    }
+    # define the colours
+    if (opts$nb.colour == "mean") {
+      bcols <- makeCols(pVmean[node_tf], pal)
+    } else if (opts$nb.colour == "median") {
+      bcols <- makeCols(pVmedian[node_tf], pal)
+    } else if (opts$nb.colour == "mode") {
+      bcols <- makeCols(pVmode[node_tf], pal)
+    } else if (opts$nb.colour == "sd") {
+      bcols <- makeCols(pVsd[node_tf], pal)
+    } else if (opts$nb.colour == "scale_pc") {
+      bcols <- makeCols(pS[node_tf], pal)
+    }
+  } else {
+    cols <- nb.fill
+  }
+
+  # define transparencies if needed.
+  if (opts$shape.transparency == "scale_pc") {
+    trans <- generateTrans(cols$cols, pS)
+  } else if (opts$shape.transparency == "mean") {
+    trans <- generateTrans(cols$cols, pVmean)
+  } else if (opts$shape.transparency == "median") {
+    trans <- generateTrans(cols$cols, pVmedian)
+  } else if (opts$shape.transparency == "mode") {
+    trans <- generateTrans(cols$cols, pVmode)
+  } else if (opts$shape.transparency == "sd") {
+    trans <- generateTrans(cols$cols, pVsd)
+  }
+
+  # define scale - then match to the nodes
+  if (opts$nb.scale == "mean") {
+    pcex <- opts$nb.cex * pVmean[node_tf]
+  } else if (opts$nb.scale == "median") {
+    pcex <- opts$nb.cex * pVmedian[node_tf]
+  } else if (opts$nb.scale == "mode") {
+    pcex <- opts$nb.cex * pVmode[node_tf]
+  } else if (opts$nb.scale == "sd") {
+    pcex <- opts$nb.cex * pVsd[node_tf]
+  } else if (opts$nb.scale == "scale_pc") {
+    pcex <- opts$nb.cex * pS[node_tf]
+  }
+
+# OLD
+
+  pprobs <- PP$scalars[which(
+    (PP$scalars[ , cl] / PP$niter) >= threshold
+  ) , cl] / PP$niter
 
   if (transparency) {
     alphas <- pprobs
@@ -104,8 +253,9 @@ transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
   }
 
   list(nodes = as.numeric(nodes), 
-    colours = col, 
-    alphas = alphas, 
+    colours = cols$cols, 
+    alphas = trans,
+    scale.cols = cols$scale.cols, 
     nodecex = as.numeric(nodecex[, 1]))
 }
 
@@ -155,6 +305,18 @@ transShifts <- function(PP, threshold, cl, tree, transparency, relativetrans,
 #' @export
 
 # I think there might be too many options here - what is actually useful?!
+# rework notes.
+# RATE PLOTTING.
+#   Threshold determines which branches have a colour applied to them. 
+#   Then the coloured branches are either coloured by the percentage of time
+#   they are scaled, OR by the magnitude of the scalar.
+#   Third option is to plot the tree scaled according to the magnitude of the
+#     scalar and then have the colour of the branch correspond to the percentage
+#     of time the branch is receiving a scalar.
+#   DEFAULT BEHAVIOUR.
+#     Plot branches coloured by rate, and branches below the threshold remain
+#     uncoloured. Scale bar shows rate. Then pass through a control list (or
+#     something?!) to allow more complex mixing of parameters...
 
 plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2,
   scaled = "time", scalebar = TRUE, measure = "median", excludeones = FALSE,
@@ -162,52 +324,80 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2,
   gradientcols = c("dodgerblue", "firebrick1"), rate.edges = NULL,
   colour = "red", colour2 = "green",  shp = 21, tips = FALSE, ...) {
 
-  if (scalar == "delta") {
-    cl <- "nOrgnDelta"
-    mode <- "trans"
-  } else if (scalar == "kappa") {
-    cl <- "nOrgnKappa"
-    mode <- "trans"
-  } else if (scalar == "lambda") {
-    cl <- "nOrgnLambda"
-    mode <- "trans"
-  } else if (scalar == "branch") {
-    cl <- "nOrgnBRate"
-    mode <- "trans"
-  } else if (scalar == "node") {
-    cl <- "nOrgnNRate"
-    mode <- "trans"
-  } else if (scalar == "rate") {
-    cl <- "nOrgnScalar"
-    mode <- "rate"
-  } else if (scalar == "nodebranch") {
-    cl <- c("nOrgnNRate", "nOrgnBRate")
-    mode <- "doubletrans"
+  # options.
+  #   threshold = numeric, 0-1
+  #   transformation = rates, delta, kappa, lambda
+  #   branch.colour = none, mean, median, mode, sd, scale_pc
+  #   branch.transparency = none, scale_pc, mean, median, mode, sd
+  #   coloured.brances = threshold, all, none
+  #   nb.colour = mean, median, mode, sd, scale_pc, none
+  #   nb.transparency = none, mean, median, mode, sd, scale_pc
+  #   nb.fill = any single colour
+  #   nb.border = any single colour
+  #   nb.shape = a pch number, OR directional
+  #   nb.cex = scaling factor for the node/branch shapes
+  #   branch.scale = none, mean, median, mode, sd, scale_pc
+  #   scaled.branches = threshold, all, none
+  #   na.colour = any colour (name or hex)
+  #   palette = viridis, plasma, magma, inferno, cividis, at least two colours
+  #   rates.mode = all, rates, nodes, branches, nodes_branches
+
+  transformation <- names(PP$origins)
+  if ("nodes" %in% transformation) {
+    transformation <- c("rates", 
+      transformation[!transformation %in% c("nodes", "branches")])
   }
 
-  if (scaled == "time") {
-    tree <- PP$tree_summary$tree_summaries$original_tree
-  } else if (scaled == "mean") {
-    tree <- PP$tree_summary$tree_summaries$mean_tree
-  } else if (scaled == "median") {
-    tree <- PP$tree_summary$tree_summaries$median_tree
-  } else if (scaled == "mode") {
-    tree <- PP$tree_summary$tree_summaries$mode_tree
-  } else if (scaled == "threshold") {
-    if (mode == "rate") {
-      tree <- tree
-    } else {
-      # tree <- shiftScaledTree() #### IN DEV.
-    }
+  opts <- list(
+    threshold = 0,
+    transformation = transformation,
+    branch.colour = "mean",
+    branch.transparency = "none",
+    coloured.branches = "threshold",
+    nb.colour = "mean",
+    nb.transparency = "none",
+    nb.fill = "red",
+    nb.border = "black",
+    nb.scale = "mean",
+    nb.shape = 21,
+    nb.cex = 2,
+    branch.scale = "none",
+    scaled.branches = "threshold",
+    na.colour = "black",
+    palette = "viridis",
+    rates.mode = "all"
+  )
+  opts[names(plot.options)] <- plot.options
+
+  # if there are multiple transformations, ask the user which to return.
+  if (length(opts$transformation) >1 ) {
+    message("Multiple transformations detected. Please select one to plot:")
+    opts$transformation <- select.list(choices = opts$transformation)
   }
 
-  if (mode == "trans") {
-    edge.cols <- "black"
-
-    if (isDefined(rate.edges)) {
-      try(if(is.null(PP$scalars)) stop("No rate scalars in posterior output."))
-      edge.cols <- rateShifts(PP, threshold = rate.edges, gradientcols, colour)
+  if (opts$transformation == "rates") {
+    if (opts$rates.mode == "all" | opts$rates.mode == "rates") {
+      # get edge colours for linear rates.
+      branch_cols <- branchColours(PP, opts)
     }
+
+    if (opts$rate.mode == "nodes" | rates$rates.mode == "nodes_branches" | 
+      opts$rates.mode == "all") {
+      # get node shapes
+      node_shapes <- nodeShapes(PP, opts, mode = "nodes")
+    }
+
+    if (opts$rates.mode == "branches" | opts$rates.mode == "nodes_branches" | 
+      opts$rates.mode == "all") {
+      # get branch shapes
+      branch_shapes <- nodeShapes(PP, opts, mode = "branches")
+    }
+
+  } else if (opts$transformation == "delta" | opts$transformation == "lamba" |
+    opts$tranformation == "kappa") {
+    # get node shapes
+    node_shapes <- nodeShapes(PP, opts, mode = "nodes")
+  }
 
     node_info <- transShifts(
       PP,
@@ -221,52 +411,19 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2,
       nodecex
     )
 
-  } else if (mode == "doubletrans") {
-    edge.cols <- "black"
-
-    if (isDefined(rate.edges)) {
-      try(if(is.null(PP$scalars)) stop("No rate scalars in posterior output."))
-      edge.cols <- rateShifts(PP, threshold = rate.edges, gradientcols, colour)
-    }
-
-    node_info <- transShifts(
-      PP,
-      threshold,
-      cl[1],
-      tree,
-      transparency,
-      relativetrans,
-      nodescaling,
-      colour,
-      nodecex
-    )
-
-    branch_info <- transShifts(
-      PP,
-      threshold2,
-      cl[2],
-      tree,
-      transparency,
-      relativetrans,
-      nodescaling,
-      colour2,
-      nodecex
-    )
-
-  } else if (mode == "rate") {
-    edge.cols <- rateShifts(PP, threshold, gradientcols, colour)
-  }
-
+  # here is the plotting - this needs refining - a multi-panel plot for 
+  # rates.mode = ALL, and then the correct colour scales etc. to be added
+  # as well.
   plotPhylo(tree, tips = tips, edge.col = edge.cols, scale = scalebar, ...)
 
   if (scalar != "rate") {
     if (scalar == "branch") {
-      edgelabels(edge = node_info$nodes, bg = node_info$col,
+      ape::edgelabels(edge = node_info$nodes, bg = node_info$col,
         pch = shp, cex = node_info$nodecex)
     } else if (scalar == "nodebranch") {
-      nodelabels(node = node_info$nodes, bg = node_info$col,
+      ape::nodelabels(node = node_info$nodes, bg = node_info$col,
         pch = shp, cex = node_info$nodecex)
-      edgelabels(edge = branch_info$nodes, bg = branch_info$col,
+      ape::edgelabels(edge = branch_info$nodes, bg = branch_info$col,
         pch = shp, cex = branch_info$nodecex)
     } else {
       ape::nodelabels(node = node_info$nodes, bg = node_info$col,
@@ -284,3 +441,22 @@ plotShifts <- function(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2,
 # be a "summarise RJPP" type of function that reduces the table down to the
 # specific interests of the user, which also returns the edge labels, colours
 # and transparencies that will be needed to plot that object.
+
+# general plotShifts workflow...
+
+# 1) identify the transformation(s) requested
+# 2) generate edge colours for each of those transformations (see control list)
+# 3) generate node labels for each of those transformations (see control list)
+# 4) transform the tree for each of those transformations (see control list)
+# 5) plot each of the trees with the right colours, node labels and branch
+#   lengths according to specified control list.
+# 6) add the scale bar for the colour gradient (if present).
+# 7) add a time axis?!
+
+# The plots that are generated for the presence of each transformation.
+# RATES
+#   1) A tree with branches coloured according to rate - not scaled.
+#   2) A tree with node scalars over the threshold plotted, coloured according
+#     to scalar value
+#   3) A tree with branch scalars over the threshold plotted, coloured according
+#     to scalar value

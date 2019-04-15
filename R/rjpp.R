@@ -159,9 +159,10 @@ createCountsTable <- function(reftree) {
       species_key[[i]]$nodes <- counts[i, 3:4]
       species_key[[i]]$species <- strsplit(counts[i, "species"], ",")[[1]]
     }
-
+  species_key[[1]][[1]] <- "root"
+  species_key[[1]][[2]] <- reftree$tip.label
   counts <- counts[ , names(counts) != "species"]
-    
+  class(species_key) <- append("spkey", class(species_key))
   counts[ , c(9:42)] <- 0
   return(list(counts = counts, species_key = species_key))
 }
@@ -409,6 +410,16 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     counts$nDelta + counts$nKappa + counts$nLambda
 
   # Fill in transformation magnitude information.
+  counts[ , "meanRate"] <- rowMeans(origins$rates)
+  counts[ , "medianRate"] <- apply(origins$rates, 1, median)
+  counts[ , "modeRate"] <- apply(origins$rates, 1, modeStat)
+  counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - 
+    apply(origins$rates, 1, min))
+  counts[ , "sdRate"] <- apply(origins$rate, 1, sd)
+  counts[ , "nRate"] <- apply(origins$rates, 1, function(x) {
+    sum(x != 1)
+  })
+
   counts[ , "meanDelta"] <- rowMeans(origins$delta)
   counts[ , "medianDelta"] <- apply(origins$delta, 1, median)
   counts[ , "modeDelta"] <-  apply(origins$delta, 1, modeStat)
@@ -430,16 +441,6 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     apply(origins$lambda, 1, min))
   counts[ , "sdLambda"] <- apply(origins$lambda, 1, sd)
 
-  counts[ , "meanRate"] <- rowMeans(origins$rates)
-  counts[ , "medianRate"] <- apply(origins$rates, 1, median)
-  counts[ , "modeRate"] <- apply(origins$rates, 1, modeStat)
-  counts[ , "rangeRate"] <- suppressWarnings(apply(origins$rates, 1, max) - 
-    apply(origins$rates, 1, min))
-  counts[ , "sdRate"] <- apply(origins$rate, 1, sd)
-
-  counts[ , "nRate"] <- apply(origins$rates, 1, function(x) {
-    sum(x != 1)
-  })
   counts[ , "nScalar"] <- counts[ , "nRate"] + counts[ , "nDelta"] +
     counts[ , "nKappa"] + counts[ , "nLambda"]
 
@@ -491,6 +492,7 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
 
   if (!is.null(origins$rates)) {
     res <- c(res, list(rates = tibble::as_tibble(origins$rates)))
+    origins$rates <- NULL
   }
 
   origins <- lapply(origins, tibble::as_tibble)
