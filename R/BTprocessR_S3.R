@@ -189,3 +189,12 @@ print.rjpp <- function(x) {
   cat(paste0("A posterior consisting of ", x$niter, " samples,\n"))
   cat(paste0("for a tree of ", length(x$species_key[[1]][[2]]), " species and ", nrow(x$tree_summary$tree_summaries$original_tree$edge), " edges."))
 }
+
+#' a plot method for class rjpp.
+#' @method plot rjpp
+#' @name plot.rjpp
+#' @export
+
+plot.rjpp <- function(x, plot.options = list(), ...) {
+  plotShifts(x, plot.options = plot.options, ...)
+}

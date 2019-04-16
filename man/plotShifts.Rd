@@ -14,5 +14,36 @@ plotShifts(PP, plot.options = list(), ...)
 \description{
 Plots the locations of the origins of scalars from the postprocessor output
 of bayestraits.
-CURRENTLY WORKS ONLY FOR DELTAS.
+}
+\details{
+The default behaviour of plotShifts depends on the transformations
+present in the rjpp output. If variable rates, then 3 trees will be plotted:
+the first has branches coloured according the log of the mean rate, the 
+second shows all node scalars present more than once in the posterior, 
+coloured according to the mean log rate and the third shows the same for 
+branch scalars. If delta, kappa or lambda are present then a single tree is 
+plotted showing all nodes that receive a scalar, coloured according to mean 
+magnitude. If multiple transformations are present then the user will be
+prompted to select one. 
+The plot.options list provides a high degree of control over what
+is plotted, allowing the default behaviour to be customised. The options, and
+values that they can take, are as follows.
+
+\itemize{
+\item{"threshold"}{0-1 - The threshold of presence in the posterior over which 
+a node and/or branch scalar is plotted. Also the threshold referenced by 
+coloured.edges and scaled.edges.}
+\item{"transformation"}{rate, delta, lambda, kappa - The transformation to 
+plot.}
+\item{"edge.colour"}{none, mean, median, mode, sd, scale_pc - the metric to
+colour edges by. If none branches default to the na.colour option. Mean,
+median, mode and sd correspond to the appropriate branch lengths from the 
+posterior of trees and scale_pc colours edges according to the percentage of
+time they are scaled in the posterior.}
+\item{"edge.transparency"}{none, scale_pc, sd - the measure to make edges 
+proportionally transparent by. None results in uniform solid branches, 
+scale_pc gives edges that are scaled less frequently in the posterior higher
+transparency, and sd gives branches that have higher SD of estimated branch
+lengths more solid colours.}
+}
 }
