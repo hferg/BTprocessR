@@ -157,3 +157,35 @@ autoplot.bt_stones <- function(x) {
 plot.bt_stones <- function(x) {
   autoplot(x)
 }
+
+#' A print method for the class "spkey"
+#' @method print spkey
+#' @name print.spkey
+#' @export
+
+print.spkey <- function(x) {
+  len <- length(x)
+  tips <- length(x[[1]][[2]])
+  cat(paste0("\nDescendant species key for a tree of ", len, " edges and ", tips, " species.\n"))
+  cat("Element names correspond to column node_id in scalars table of rjpp output.\n")
+}
+
+#' A print method for the class "rjpp".
+#' @method print rjpp
+#' @name print.rjpp
+#' @export
+
+print.rjpp <- function(x) {
+  trans <- names(x$origins)
+  if ("nodes" %in% trans | "branches" %in% trans) {
+    trans <- c("variable rates", trans[!trans %in% c("nodes", "branches")])
+  }
+  cat("\nBayesTraits reversible-jump output testing the following transformations:\n")
+  cat("\n")
+  for (i in seq_along(trans)) {
+    cat(paste0("\t", trans[i], "\n"))
+  }
+  cat("\n")
+  cat(paste0("A posterior consisting of ", x$niter, " samples,\n"))
+  cat(paste0("for a tree of ", length(x$species_key[[1]][[2]]), " species and ", nrow(x$tree_summary$tree_summaries$original_tree$edge), " edges."))
+}

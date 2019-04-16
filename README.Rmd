@@ -121,6 +121,7 @@ vdelta_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vdelta_trees, 
 
 # rjpp returns a list with six elements, and a lot of information.
 class(vrates_summary)
+vrates_summary
 names(vrates_summary)
 
 ```
@@ -133,39 +134,39 @@ The rjpp function returns a list of six elements. These elements are detailed he
 Most of the important information is returned in the first element of the output - a tibble called "scalars". The columns of this tibble break down into three main categories. These are general branch/node information, total scalar information and then (depending on which transformations were permitted in the model) linear rate scalars, delta transformations, kappa transformations and lambda transformations. Below is more detail on what each column contains.
 
 * **General branch/node information.** Throughout the output here branches are defined by their ancestral and descendent node numbers. Nodes are defined by the branch leading to them. These node numbers (ancestral and descendent) are the equivalent to the numbering system assigned to a tree when read in using ape::read.nexus(). All trees are ladderized using ape::ladderize() to ensure numbering consistency, and so when using this output always use ape::ladderize() to ensure consistency.
-  + node_id: This is an ID that corresponds to the species names in the "species_key" element of the rjpp output.
-  + branch: This is the branch ID number, with the root named "root". This ought to correspond to the same numbering system ape uses to number nodes on the tree if the tree is ladderized.
-  + andNode: The ancestral node of the branch.
-  + descNode: The descendent node of the branch.
-  + nTips: The number of tips (terminal nodes) that descend from this particular branch/node.
-  + start: The time before present when the branch begins pre-transformations (according to the time scale of the original tree).
-  + end: The time before present when the branch ends pre-transformations (either bifurcates, or terminates).
-  + mid: The midpoint of the branch (time before present).
+  + **node_id**: This is an ID that corresponds to the species names in the "species_key" element of the rjpp output.
+  + **branch**: This is the branch ID number, with the root named "root". This ought to correspond to the same numbering system ape uses to number nodes on the tree if the tree is ladderized.
+  + **andNode**: The ancestral node of the branch.
+  + **descNode**: The descendent node of the branch.
+  + **nTips**: The number of tips (terminal nodes) that descend from this particular branch/node.
+  + **start**: The time before present when the branch begins pre-transformations (according to the time scale of the original tree).
+  + **end**: The time before present when the branch ends pre-transformations (either bifurcates, or terminates).
+  + **mid**: The midpoint of the branch (time before present).
 
 * **Total scalar information**
-  + nScalar: The total number of scalars (of all types) that affect this branch.
-  + pScalar: The probability that this branch is affected by a scalar (nScalar / number of samples in posterior).
-  + nOrgnScalar: The number of scalars that _originate_ at this particular branch. This differs from nScalar due to linear rate scalars that operate on entire nodes rather than individual branches i.e. a rate scalar operating on a node will rate scale all descendent branches. In this case all descendent branches will receive +1 in nScalar, but only the node the scalar originates from will receive +1 in nOrgnScalar.
+  + **nScalar**: The total number of scalars (of all types) that affect this branch.
+  + **pScalar**: The probability that this branch is affected by a scalar (nScalar / number of samples in posterior).
+  + **nOrgnScalar**: The number of scalars that _originate_ at this particular branch. This differs from nScalar due to linear rate scalars that operate on entire nodes rather than individual branches i.e. a rate scalar operating on a node will rate scale all descendent branches. In this case all descendent branches will receive +1 in nScalar, but only the node the scalar originates from will receive +1 in nOrgnScalar.
 
 * **Linear rate scalar information** i.e. when varrates is turned on.
-  + nRate: The number of times the branch is affected by a linear rate scalar (_including_ the tipward effects of node scalars).
-  + pRate: The probability of a branch being affected by a linear rate scalar in the posterior (nRate / number of samples in the posterior. Again, including the tipward effects of node scalars).
-  + nOrgnNRate: The number of node scalars that originate at this particular node.
-  + nOrgnBRate: The number of branch scalars that originate at this particular node.
-  + meanRate: The mean rate scalar effecting this branch (including the tipward effects of node scalars).
-  + medianRate: The median rate scalar effecting this branch (including the tipward effects of node scalars).
-  + modeRate: The mode rate scalar effecting this branch (including the tipward effects of node scalars).
-  + rangeRate: The range of rate scalars effecting this branch (including the tipward effects of node scalars).
-  + sdRate: The standard deviation of rate scalars effecting this branch (including the tipward effects of node scalars).
+  + **nRate**: The number of times the branch is affected by a linear rate scalar (_including_ the tipward effects of node scalars).
+  + **pRate**: The probability of a branch being affected by a linear rate scalar in the posterior (nRate / number of samples in the posterior. Again, including the tipward effects of node scalars).
+  + **nOrgnNRate**: The number of node scalars that originate at this particular node.
+  + **nOrgnBRate**: The number of branch scalars that originate at this particular node.
+  + **meanRate**: The mean rate scalar effecting this branch (including the tipward effects of node scalars).
+  + **medianRate**: The median rate scalar effecting this branch (including the tipward effects of node scalars).
+  + **modeRate**: The mode rate scalar effecting this branch (including the tipward effects of node scalars).
+  + **rangeRate**: The range of rate scalars effecting this branch (including the tipward effects of node scalars).
+  + **sdRate**: The standard deviation of rate scalars effecting this branch (including the tipward effects of node scalars).
 
 * **Transformations** Depending on the specific model this section will contain one or more of the following transformations: delta, kappa and/or lambda. Since the output for all transformations is identical for the purposes of this explanation the name of the transformation will be denoted with Trans. Due to the nature of transformations, especially nested transformations, there is no information on the tipward effects of transformations. Note that transformations are only ever applied to nodes, and not to individual branches.
-  + nTrans: The number of the particular transformation that originate at this node.
-  + pTrans: The probability of the transformation being applied to this node (nTrans / number of samples in the posterior).
-  + meanTrans: The mean value of the transformation applied to this node.
-  + medianTrans: The median value of the transformationa applied to this node.
-  + modeTrans: The modal value of teh transformation applied to this node.
-  + rangeTrans: The range of values of the transformation applied to this node.
-  + sdTrans: The standard deviation of the values of the transformation applied to this node.
+  + **nTrans**: The number of the particular transformation that originate at this node.
+  + **pTrans**: The probability of the transformation being applied to this node (nTrans / number of samples in the posterior).
+  + **meanTrans**: The mean value of the transformation applied to this node.
+  + **medianTrans**: The median value of the transformationa applied to this node.
+  + **modeTrans**: The modal value of teh transformation applied to this node.
+  + **rangeTrans**: The range of values of the transformation applied to this node.
+  + **sdTrans**: The standard deviation of the values of the transformation applied to this node.
 
 ### tree_summary
 
@@ -191,6 +192,7 @@ The number of samples in the posterior (used by other functions - not that usefu
 # Some of this should be clearer with an example where two transformations are permitted.
 rj_info <- system.file("extdata", "marsupials_variabledeltarate.txt.VarRates.txt", package = "BTprocessR")
 vdeltarate_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vdeltarate, tree = marsupial_trees$timetree)
+vdeltarate_summary
 
 ```
 

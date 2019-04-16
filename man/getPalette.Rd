@@ -6,9 +6,14 @@
 \title{getPalette
 Generate the palette for colour ramps.}
 \usage{
-getPalette(opts)
+getPalette(palette, n = 9)
 
 generateTrans(cols, values)
+}
+\arguments{
+\item{cols}{The colours to make transparent}
+
+\item{values}{The data to set transparency by}
 }
 \description{
 getPalette

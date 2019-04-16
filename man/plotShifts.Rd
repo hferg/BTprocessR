@@ -4,64 +4,12 @@
 \alias{plotShifts}
 \title{plotShifts}
 \usage{
-plotShifts(PP, scalar, threshold = 0, threshold2 = 0, nodecex = 2,
-  scaled = "time", scalebar = TRUE, measure = "median",
-  excludeones = FALSE, relativetrans = FALSE, nodescaling = TRUE,
-  transparency = FALSE, gradientcols = c("dodgerblue", "firebrick1"),
-  rate.edges = NULL, colour = "red", colour2 = "green", shp = 21,
-  tips = FALSE, ...)
+plotShifts(PP, plot.options = list(), ...)
 }
 \arguments{
-\item{PP}{The psotprocessor (localscalrPP) output.}
+\item{PP}{The output of the rjpp function.}
 
-\item{scalar}{The scalar to find and plot from the post processor -
-delta/lambda/kappa/node/branch}
-
-\item{threshold}{Threshold of probability in posterior to display deltas for,
-defaults to zero (i.e. shows all deltas shaded proportionally to the
-posterior probability)}
-
-\item{nodecex}{The scaling factor for the size of the node circles}
-
-\item{scaled}{Plot the original tree (scaled = "time", the default), or the
-mean/sclaed tree (scaled = "mean") or plot the tree scaled only by scalars
-present above the threshold (scaled = "threshold")?}
-
-\item{scalebar}{Include scale bar?}
-
-\item{measure}{When plotting "siginficant" tree, what measure of the
-parameter? Median (default), mode or mean.}
-
-\item{relativetrans}{If TRUE (defaults to FALSE) the scale of transparency
-will go from the threshold (totally transparent) to the maximum presence
-(full opacity).}
-
-\item{nodescaling}{Scale node symbols according to posterior probability of
-shift (default).}
-
-\item{transparency}{Adjust node symbol transparency according to posterior
-probability? Defaults to FALSE.}
-
-\item{gradientcols}{A vector of two colours - the min and max colours used
-when colouring the tree according to percentage time rate scaled (when
-threshold = 0) or using rate.edges.}
-
-\item{rate.edges}{Takes a numeric value between 0 and 1. If NULL (default)
-then node shapes are plotted for a transformation. If equal to zero then node
-shapes are plotted along with a colour gradient on the branches for rates (if
-in the posterior), and if set to a threshold then the branches are coloured
-black/red for whether there is a scalar over the threshold (red) along with
-node scalars.}
-
-\item{colour}{The colour to use for the node circles}
-
-\item{shp}{The shape of the node markers (uses the usual pch index).}
-
-\item{tips}{Show tip labels?}
-
-\item{exludeones}{If plotting according to a threshold of significance,
-should 1s (i.e. no scalar) be excluded from the posterior when calculating
-average scalar?}
+\item{plot.options}{A list of control options. See description.}
 }
 \description{
 Plots the locations of the origins of scalars from the postprocessor output

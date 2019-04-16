@@ -159,8 +159,7 @@ createCountsTable <- function(reftree) {
       species_key[[i]]$nodes <- counts[i, 3:4]
       species_key[[i]]$species <- strsplit(counts[i, "species"], ",")[[1]]
     }
-  species_key[[1]][[1]] <- "root"
-  species_key[[1]][[2]] <- reftree$tip.label
+  species_key[[1]] <- list(nodes = "root", species = reftree$tip.label)
   counts <- counts[ , names(counts) != "species"]
   class(species_key) <- append("spkey", class(species_key))
   counts[ , c(9:42)] <- 0
