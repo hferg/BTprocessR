@@ -18,5 +18,6 @@ Imports:
   ggthemes,
   pbapply,
   phytools,
-  ggplot2
+  ggplot2,
+  colourvalues
 RoxygenNote: 6.1.1

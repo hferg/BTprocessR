@@ -320,17 +320,17 @@ scaleTree <- function(PP, opts) {
 #' values that they can take, are as follows.
 #' 
 #' \itemize{
-#' \item{"threshold"}{0-1 - The threshold of presence in the posterior over which 
+#' \item{threshold:}{ [0-1] The threshold of presence in the posterior over which 
 #' a node and/or branch scalar is plotted. Also the threshold referenced by 
 #' coloured.edges and scaled.edges.}
-#' \item{"transformation"}{rate, delta, lambda, kappa - The transformation to 
+#' \item{transformation:}{ [rate, delta, lambda, kappa] The transformation to 
 #' plot.}
-#' \item{"edge.colour"}{none, mean, median, mode, sd, scale_pc - the metric to
+#' \item{edge.colour:}{ [none, mean, median, mode, sd, scale_pc] The metric to
 #' colour edges by. If none branches default to the na.colour option. Mean,
 #' median, mode and sd correspond to the appropriate branch lengths from the 
 #' posterior of trees and scale_pc colours edges according to the percentage of
 #' time they are scaled in the posterior.}
-#' \item{"edge.transparency"}{none, scale_pc, sd - the measure to make edges 
+#' \item{"edge.transparency"}{ [none, scale_pc, sd] The measure to make edges 
 #' proportionally transparent by. None results in uniform solid branches, 
 #' scale_pc gives edges that are scaled less frequently in the posterior higher
 #' transparency, and sd gives branches that have higher SD of estimated branch
