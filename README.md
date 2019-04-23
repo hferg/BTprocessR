@@ -287,11 +287,25 @@ class(vrates_summary)
 ```
 
 ```r
+vrates_summary
+```
+
+```
+## 
+## BayesTraits reversible-jump output testing the following transformations:
+## 
+## 	variable rates
+## 
+## A posterior consisting of 500 samples,
+## for a tree of 246 species and 490 edges.
+```
+
+```r
 names(vrates_summary)
 ```
 
 ```
-## [1] "data"         "tree_summary" "species_key"  "scalars"     
+## [1] "scalars"      "tree_summary" "species_key"  "rates"       
 ## [5] "origins"      "niter"
 ```
 ## The output of rjpp
@@ -303,39 +317,39 @@ The rjpp function returns a list of six elements. These elements are detailed he
 Most of the important information is returned in the first element of the output - a tibble called "scalars". The columns of this tibble break down into three main categories. These are general branch/node information, total scalar information and then (depending on which transformations were permitted in the model) linear rate scalars, delta transformations, kappa transformations and lambda transformations. Below is more detail on what each column contains.
 
 * **General branch/node information.** Throughout the output here branches are defined by their ancestral and descendent node numbers. Nodes are defined by the branch leading to them. These node numbers (ancestral and descendent) are the equivalent to the numbering system assigned to a tree when read in using ape::read.nexus(). All trees are ladderized using ape::ladderize() to ensure numbering consistency, and so when using this output always use ape::ladderize() to ensure consistency.
-  + node_id: This is an ID that corresponds to the species names in the "species_key" element of the rjpp output.
-  + branch: This is the branch ID number, with the root named "root". This ought to correspond to the same numbering system ape uses to number nodes on the tree if the tree is ladderized.
-  + andNode: The ancestral node of the branch.
-  + descNode: The descendent node of the branch.
-  + nTips: The number of tips (terminal nodes) that descend from this particular branch/node.
-  + start: The time before present when the branch begins pre-transformations (according to the time scale of the original tree).
-  + end: The time before present when the branch ends pre-transformations (either bifurcates, or terminates).
-  + mid: The midpoint of the branch (time before present).
+  + **node_id**: This is an ID that corresponds to the species names in the "species_key" element of the rjpp output.
+  + **branch**: This is the branch ID number, with the root named "root". This ought to correspond to the same numbering system ape uses to number nodes on the tree if the tree is ladderized.
+  + **andNode**: The ancestral node of the branch.
+  + **descNode**: The descendent node of the branch.
+  + **nTips**: The number of tips (terminal nodes) that descend from this particular branch/node.
+  + **start**: The time before present when the branch begins pre-transformations (according to the time scale of the original tree).
+  + **end**: The time before present when the branch ends pre-transformations (either bifurcates, or terminates).
+  + **mid**: The midpoint of the branch (time before present).
 
 * **Total scalar information**
-  + nScalar: The total number of scalars (of all types) that affect this branch.
-  + pScalar: The probability that this branch is affected by a scalar (nScalar / number of samples in posterior).
-  + nOrgnScalar: The number of scalars that _originate_ at this particular branch. This differs from nScalar due to linear rate scalars that operate on entire nodes rather than individual branches i.e. a rate scalar operating on a node will rate scale all descendent branches. In this case all descendent branches will receive +1 in nScalar, but only the node the scalar originates from will receive +1 in nOrgnScalar.
+  + **nScalar**: The total number of scalars (of all types) that affect this branch.
+  + **pScalar**: The probability that this branch is affected by a scalar (nScalar / number of samples in posterior).
+  + **nOrgnScalar**: The number of scalars that _originate_ at this particular branch. This differs from nScalar due to linear rate scalars that operate on entire nodes rather than individual branches i.e. a rate scalar operating on a node will rate scale all descendent branches. In this case all descendent branches will receive +1 in nScalar, but only the node the scalar originates from will receive +1 in nOrgnScalar.
 
 * **Linear rate scalar information** i.e. when varrates is turned on.
-  + nRate: The number of times the branch is affected by a linear rate scalar (_including_ the tipward effects of node scalars).
-  + pRate: The probability of a branch being affected by a linear rate scalar in the posterior (nRate / number of samples in the posterior. Again, including the tipward effects of node scalars).
-  + nOrgnNRate: The number of node scalars that originate at this particular node.
-  + nOrgnBRate: The number of branch scalars that originate at this particular node.
-  + meanRate: The mean rate scalar effecting this branch (including the tipward effects of node scalars).
-  + medianRate: The median rate scalar effecting this branch (including the tipward effects of node scalars).
-  + modeRate: The mode rate scalar effecting this branch (including the tipward effects of node scalars).
-  + rangeRate: The range of rate scalars effecting this branch (including the tipward effects of node scalars).
-  + sdRate: The standard deviation of rate scalars effecting this branch (including the tipward effects of node scalars).
+  + **nRate**: The number of times the branch is affected by a linear rate scalar (_including_ the tipward effects of node scalars).
+  + **pRate**: The probability of a branch being affected by a linear rate scalar in the posterior (nRate / number of samples in the posterior. Again, including the tipward effects of node scalars).
+  + **nOrgnNRate**: The number of node scalars that originate at this particular node.
+  + **nOrgnBRate**: The number of branch scalars that originate at this particular node.
+  + **meanRate**: The mean rate scalar effecting this branch (including the tipward effects of node scalars).
+  + **medianRate**: The median rate scalar effecting this branch (including the tipward effects of node scalars).
+  + **modeRate**: The mode rate scalar effecting this branch (including the tipward effects of node scalars).
+  + **rangeRate**: The range of rate scalars effecting this branch (including the tipward effects of node scalars).
+  + **sdRate**: The standard deviation of rate scalars effecting this branch (including the tipward effects of node scalars).
 
 * **Transformations** Depending on the specific model this section will contain one or more of the following transformations: delta, kappa and/or lambda. Since the output for all transformations is identical for the purposes of this explanation the name of the transformation will be denoted with Trans. Due to the nature of transformations, especially nested transformations, there is no information on the tipward effects of transformations. Note that transformations are only ever applied to nodes, and not to individual branches.
-  + nTrans: The number of the particular transformation that originate at this node.
-  + pTrans: The probability of the transformation being applied to this node (nTrans / number of samples in the posterior).
-  + meanTrans: The mean value of the transformation applied to this node.
-  + medianTrans: The median value of the transformationa applied to this node.
-  + modeTrans: The modal value of teh transformation applied to this node.
-  + rangeTrans: The range of values of the transformation applied to this node.
-  + sdTrans: The standard deviation of the values of the transformation applied to this node.
+  + **nTrans**: The number of the particular transformation that originate at this node.
+  + **pTrans**: The probability of the transformation being applied to this node (nTrans / number of samples in the posterior).
+  + **meanTrans**: The mean value of the transformation applied to this node.
+  + **medianTrans**: The median value of the transformationa applied to this node.
+  + **modeTrans**: The modal value of teh transformation applied to this node.
+  + **rangeTrans**: The range of values of the transformation applied to this node.
+  + **sdTrans**: The standard deviation of the values of the transformation applied to this node.
 
 ### tree_summary
 
@@ -347,7 +361,7 @@ This is a list of n elements, where n is the number of branches (edges) in the p
 
 ### rates
 
-This table contains the linear rate scalar that is applied to each branch in each sample in the posterior. This is a n * (m + 2) tibble, where n is the number of branches in the tree + 1 (to account for the root) and m is the number of samples in the posterior (+2 to account for the two identification columns). The first two columns are the node_id (which corresponds to the scalars table and the species_key) and the branch number (corresponding to ape node numbering). Each subsequent column is one sample of the posterior. This table _includes_ the tipward effects of node scalars.
+This table contains the linear rate scalar that is applied to each branch in each sample in the posterior (the effects of both node scalars and branch scalars). This is a n * (m + 2) tibble, where n is the number of branches in the tree + 1 (to account for the root) and m is the number of samples in the posterior (+2 to account for the two identification columns). The first two columns are the node_id (which corresponds to the scalars table and the species_key) and the branch number (corresponding to ape node numbering). Each subsequent column is one sample of the posterior. This table _includes_ the tipward effects of node scalars.
 
 ### origins
 
@@ -374,15 +388,22 @@ vdeltarate_summary <- rjpp(rjlog = rj_info, rjtrees = marsupial_trees$vdeltarate
 ## [1] "Searching for scalars..."
 ```
 
-The final column in "data" is called "node_id" - this relates the node to the element of the output "species_key" which details the name of each species descendent from the node.
+```r
+vdeltarate_summary
+```
 
-The second element, "tree_summary", is the output of the function summariseTrees - it contains the original time-tree, the mean, median and modal trees from the posterior, and the branch length information for all of these trees (which is duplicated from the "data" table).
+```
+## 
+## BayesTraits reversible-jump output testing the following transformations:
+## 
+## 	variable rates
+## 	delta
+## 
+## A posterior consisting of 500 samples,
+## for a tree of 246 species and 490 edges.
+```
 
-The third element is "species_key". This is a list with one element per branch of the tree (including the root). Each of these elements contains the ancestor node and descendent node of the branch, and the identities of all species descending from it. The names of each element correspond to the node_id column in "data".
-
-Next there are two large tibbles, "scalars" and "origins". Each of these has a number of rows equal to the number of edges in the tree and a number of columns equal to the number of samples in the posterior. Scalars contains scalar a branch receives in each sample (i.e. including the effects of rootward scalars), and origins contains just the values of the scalars that each node received in each sample. If multiple transformations are permitted in the model then scalars and origins will have a seperate tibble for each transformation.
-
-Finally there is a single integer "niters" - this is simply the number of samples in the posterior and is used in downstream functions.
+## Plotting the output of RJ models
 
 
 <!-- ## Contents -->
