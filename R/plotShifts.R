@@ -1,37 +1,9 @@
 ##############################################################################
-#' getPalette
-#' Generate the palette for colour ramps.
-#' @name getPalette
-#' @keywords internal
-getPalette <- function(palette, n = 9) {
-  if (palette == "viridis") {
-    pal <- viridis::viridis(n)
-  } else if (palette == "plasma") {
-    pal <- viridis::plasma(n)
-  } else if (palette == "magma") {
-    pal <- viridis::magma(n)
-  } else if (palette == "cividis") {
-    pal <- viridis::cividis(n)
-  } else if (palette == "inferno") {
-    pal <- viridis::inferno(n)
-  } else {
-    pal <- tryCatch({
-      gplots::col2hex(palette)
-    },
-    error = function(e) {
-      message("Palette contains invalid colour names:")
-      message(e)
-    })
-  }
-  return(pal)
-}
-
-##############################################################################
 #' generateTrans
 #' Generate the transparencies from data and colours
 #' @param cols The colours to make transparent
 #' @param values The data to set transparency by
-#' @name getPalette
+#' @name generateTrans
 #' @keywords internal
 
 generateTrans <- function(cols, values) {
@@ -73,13 +45,11 @@ branchColours <- function(PP, opts) {
     sd = PP$scalars$sdRate[2:nrow(PP$scalars)]
   )
 
-  pal <- getPalette(opts$edge.palette)
-
   if (opts$edge.colour != "none") {
     xx <- plot.dat[[opts$edge.colour]]
-    edge.cols <- plotrix::color.scale(xx, extremes = pal, na.color = NA)
+    edge.cols <- colourvalues::colour_values(xx, palette = opts$edge.palette)
     ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
-    scale.cols <- plotrix::color.scale(ss, extremes = pal, na.color = NA)
+    scale.cols <- colourvalues::colour_values(ss, palette = opts$edge.palette)
     scale.lims <- range(ss)
   } else if (opts$edge.colour == "none") {
     edge.cols <- rep("black", length(xx))
@@ -119,36 +89,23 @@ shapeCols <- function(opts, plot.dat, mode) {
       cols <- scale.cols <- opts$node.fill
       scale.lims <- c(0, 0)
     } else {
-      if (length(plot.dat[[opts$node.colour]]) < 9) {
-        cols <- getPalette(opts$node.palette, 
-          n = length(plot.dat[[opts$node.colour]]))
-      } else {
-        pal <- getPalette(opts$node.palette, n = 9)
-        xx <- plot.dat[[opts$node.colour]]
-        cols <- plotrix::color.scale(xx, extremes = pal, 
-          na.color = NA)
-      }      
+      xx <- plot.dat[[opts$node.colour]]
+      cols <- colourvalues::colour_values(xx, palette = opts$node.palette)
       ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
+      scale.cols <- colourvalues::colour_values(ss, palette = opts$node.palette)
       scale.lims <- range(ss)
-      scale.cols <- plotrix::color.scale(ss, extremes = pal, na.color = NA)
     }
   } else if (mode == "branches") {
     if (opts$branch.colour == "none") {
       cols <- scale.cols <- opts$branch.fill
       scale.lims <- c(0, 0)
     } else {
-      if (length(plot.dat[[opts$branch.colour]]) < 9) {
-        cols <- getPalette(opts$branch.palette, 
-          n = length(plot.dat[[opts$branch.colour]]))
-      } else {
-        pal <- getPalette(opts$branch.palette, n = 9)
-        xx <- plot.dat[[opts$branch.colour]]
-        cols <- plotrix::color.scale(xx, extremes = pal, 
-          na.color = NA)
-      }
+      xx <- plot.dat[[opts$branch.colour]]
+      cols <- colourvalues::colour_values(xx, palette = opts$branch.palette)
       ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
+      scale.cols <- colourvalues::colour_values(ss, 
+        palette = opts$branch.palette)
       scale.lims <- range(ss)
-      scale.cols <- plotrix::color.scale(ss, extremes = pal, na.color = NA)
     }
   }
   return(list(cols = cols, scale.cols = scale.cols, scale.lims = scale.lims))
