@@ -9,7 +9,9 @@ plotShifts(PP, plot.options = list(), ...)
 \arguments{
 \item{PP}{The output of the rjpp function.}
 
-\item{plot.options}{A list of control options. See description.}
+\item{plot.options}{A list of control options. See details.}
+
+\item{...}{Additional arguments passed to plotPhylo}
 }
 \description{
 Plots the locations of the origins of scalars from the postprocessor output
@@ -40,10 +42,60 @@ colour edges by. If none branches default to the na.colour option. Mean,
 median, mode and sd correspond to the appropriate branch lengths from the 
 posterior of trees and scale_pc colours edges according to the percentage of
 time they are scaled in the posterior.}
-\item{"edge.transparency"}{ [none, scale_pc, sd] The measure to make edges 
+\item{edge.transparency:}{ [none, scale_pc, sd] The measure to make edges 
 proportionally transparent by. None results in uniform solid branches, 
 scale_pc gives edges that are scaled less frequently in the posterior higher
 transparency, and sd gives branches that have higher SD of estimated branch
 lengths more solid colours.}
+\item{coloured.edges:}{ [all, threshold] The edges to colour. If "all" then
+all edges are coloured according to edge.colour, otherwise if "threshold"
+then only edges that are scaled over the specified threshold are coloured.
+Uncoloured edges default to na.colour}
+\item{edge.palette:}{ [viridis, magma, inferno, plasma, viridis, 
+c("<colour1>", "<colour2>")] The colour palette for edges. If not using a 
+named palette then a vector of at least two colours must be specified - the 
+first will be the low end of the palette and the last the top end. Any other
+colours in the vector will be included in the gradient.}
+\item{edge.scale:}{ [none, mean, median, mode]}
+\item{scaled.edges:}{ [all, threshold]}
+\item{node.colour:}{ []}
+\item{node.scale:}{ []}
+\item{node.transparency:}{ []}
+\item{node.palette:}{ [viridis, magma, inferno, plasma, viridis, 
+c("<colour1>", "<colour2>")] The colour palette for node symbols. If not 
+using a named palette then a vector of at least two colours must be 
+specified - the first will be the low end of the palette and the last the top 
+end. Any other colours in the vector will be included in the gradient.}
+\item{node.fill:}{ []}
+\item{node.border:}{ []}
+\item{node.shape:}{ [any pch code] The pch code for the symbols to plot as
+node labels - standard R pch coding system.}
+\item{node.cex:}{ [0-??] The scaling factor for node symbols. This is the 
+scaling factor that the symbols start at before any subsequent scaling (i.e.
+if a node symbol receives no scaling, this is what it's scaling factor will
+be.)}
+\itvem{branch.colour:}{ []}
+\item{branch.transparency:}{ []}
+\item{branch.palette:}{ [viridis, magma, inferno, plasma, viridis, 
+c("<colour1>", "<colour2>")] The colour palette for branch symbols. If not 
+using a named palette then a vector of at least two colours must be 
+specified - the first will be the low end of the palette and the last the top 
+end. Any other colours in the vector will be included in the gradient.}
+\item{branch.fill:}{ []}
+\item{branch.border:}{ []}
+\item{branch.scale:}{ []}
+\item{branch.shape:}{ [any pch code] The pch code for the symbols to plot as
+branch labels - standard R pch coding system.}
+\item{branch.cex:}{ [0-??] The scaling factor for branch symbols. This is the 
+scaling factor that the symbols start at before any subsequent scaling (i.e.
+if a branch symbol receives no scaling, this is what it's scaling factor will
+be.}
+\item{na.colour:}{ []}
+\item{rates.mode:}{ []}
+\item{legend.pos:}{ [auto, c(xl, yb, xr, yt)] The legend position on the 
+plot. If "auto" then the legend position will be in the bottom right at 
+"best guess" coordinates. Otherwise a vector of coordinates for bottom left
+and top right corner of the legend.}
+\item{ledend:}{ []}
 }
 }

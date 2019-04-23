@@ -305,7 +305,8 @@ scaleTree <- function(PP, opts) {
 #' Plots the locations of the origins of scalars from the postprocessor output
 #' of bayestraits.
 #' @param PP The output of the rjpp function.
-#' @param plot.options A list of control options. See description.
+#' @param plot.options A list of control options. See details.
+#' @param ... Additional arguments passed to plotPhylo
 #' @details The default behaviour of plotShifts depends on the transformations
 #' present in the rjpp output. If variable rates, then 3 trees will be plotted:
 #' the first has branches coloured according the log of the mean rate, the 
@@ -330,13 +331,62 @@ scaleTree <- function(PP, opts) {
 #' median, mode and sd correspond to the appropriate branch lengths from the 
 #' posterior of trees and scale_pc colours edges according to the percentage of
 #' time they are scaled in the posterior.}
-#' \item{"edge.transparency"}{ [none, scale_pc, sd] The measure to make edges 
+#' \item{edge.transparency:}{ [none, scale_pc, sd] The measure to make edges 
 #' proportionally transparent by. None results in uniform solid branches, 
 #' scale_pc gives edges that are scaled less frequently in the posterior higher
 #' transparency, and sd gives branches that have higher SD of estimated branch
 #' lengths more solid colours.}
+#' \item{coloured.edges:}{ [all, threshold] The edges to colour. If "all" then
+#' all edges are coloured according to edge.colour, otherwise if "threshold"
+#' then only edges that are scaled over the specified threshold are coloured.
+#' Uncoloured edges default to na.colour}
+#' \item{edge.palette:}{ [viridis, magma, inferno, plasma, viridis, 
+#' c("<colour1>", "<colour2>")] The colour palette for edges. If not using a 
+#' named palette then a vector of at least two colours must be specified - the 
+#' first will be the low end of the palette and the last the top end. Any other
+#' colours in the vector will be included in the gradient.}
+#' \item{edge.scale:}{ [none, mean, median, mode]}
+#' \item{scaled.edges:}{ [all, threshold]}
+#' \item{node.colour:}{ []}
+#' \item{node.scale:}{ []}
+#' \item{node.transparency:}{ []}
+#' \item{node.palette:}{ [viridis, magma, inferno, plasma, viridis, 
+#' c("<colour1>", "<colour2>")] The colour palette for node symbols. If not 
+#' using a named palette then a vector of at least two colours must be 
+#' specified - the first will be the low end of the palette and the last the top 
+#' end. Any other colours in the vector will be included in the gradient.}
+#' \item{node.fill:}{ []}
+#' \item{node.border:}{ []}
+#' \item{node.shape:}{ [any pch code] The pch code for the symbols to plot as
+#' node labels - standard R pch coding system.}
+#' \item{node.cex:}{ [0-??] The scaling factor for node symbols. This is the 
+#' scaling factor that the symbols start at before any subsequent scaling (i.e.
+#' if a node symbol receives no scaling, this is what it's scaling factor will
+#' be.)}
+#' \itvem{branch.colour:}{ []}
+#' \item{branch.transparency:}{ []}
+#' \item{branch.palette:}{ [viridis, magma, inferno, plasma, viridis, 
+#' c("<colour1>", "<colour2>")] The colour palette for branch symbols. If not 
+#' using a named palette then a vector of at least two colours must be 
+#' specified - the first will be the low end of the palette and the last the top 
+#' end. Any other colours in the vector will be included in the gradient.}
+#' \item{branch.fill:}{ []}
+#' \item{branch.border:}{ []}
+#' \item{branch.scale:}{ []}
+#' \item{branch.shape:}{ [any pch code] The pch code for the symbols to plot as
+#' branch labels - standard R pch coding system.}
+#' \item{branch.cex:}{ [0-??] The scaling factor for branch symbols. This is the 
+#' scaling factor that the symbols start at before any subsequent scaling (i.e.
+#' if a branch symbol receives no scaling, this is what it's scaling factor will
+#' be.}
+#' \item{na.colour:}{ []}
+#' \item{rates.mode:}{ []}
+#' \item{legend.pos:}{ [auto, c(xl, yb, xr, yt)] The legend position on the 
+#' plot. If "auto" then the legend position will be in the bottom right at 
+#' "best guess" coordinates. Otherwise a vector of coordinates for bottom left
+#' and top right corner of the legend.}
+#' \item{ledend:}{ []}
 #' }
-#' 
 #' 
 #' @name plotShifts
 #' @import plotrix
@@ -344,31 +394,14 @@ scaleTree <- function(PP, opts) {
 
 plotShifts <- function(PP, plot.options = list(), ...) {
 
-  # options.
-  #   threshold = numeric, 0-1
-  #   transformation = rates, delta, kappa, lambda
-  #   branch.colour = none, mean, median, mode, sd, scale_pc
-  #   branch.transparency = none, scale_pc, sd
-  #   coloured.brances = threshold, all, none
-  #   nb.colour = mean, median, mode, sd, scale_pc, none
-  #   nb.transparency = none, mean, median, mode, sd, scale_pc
-  #   nb.fill = any single colour
-  #   nb.border = any single colour
-  #   nb.shape = a pch number, OR directional
-  #   nb.cex = scaling factor for the node/branch shapes
-  #   branch.scale = none, mean, median, mode, sd, scale_pc
-  #   scaled.branches = threshold, all, none
-  #   na.colour = any colour (name or hex)
-  #   palette = viridis, plasma, magma, inferno, cividis, at least two colours
-  #   rates.mode = all_single, all_panel, rates, nodes, branches, nodes_branches
-  #   legend.pos = auto, OR a vectro with coords for bottom left and top right of legend
-  #   legen = numeric
-
   # TODO. Work out what to do when scaling factors are negative (e.g. from 
   # logged data). Just add 1? I think first finish the function and then see 
   # what comes out with different options, see if it makes sense etc.
   # For SOME reason the colour scaling for the nodes and branches has gone out
   # of whack again - fix.
+  # TODO. Depending on the pch code the call to set the colours could be 
+  # different - e.g. 21 has bg for the fill colour and col for the border colour
+  # whereas borderless symbols just have col.
 
   transformation <- names(PP$origins)
   if ("nodes" %in% transformation) {
@@ -440,14 +473,14 @@ plotShifts <- function(PP, plot.options = list(), ...) {
 
   if (opts$transformation == "rate" && opts$rates.mode == "all_panel") {
     par(mfrow = c(1, 3))
-    plotPhylo(tree, edge.col = edge.cols$edge.cols)
+    plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
       leg <- legendInfo(tree, opts, edge.cols)
       plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
         leg$legend, rect.col = edge.cols$scale.cols, align = "rb")
       labx <- (leg$pos[1] + leg$pos[3]) / 2
       laby <- leg$pos[4] + strheight("M")
       text(labx, laby, leg.tit$edge_leg)
-    plotPhylo(tree)
+    plotPhylo(tree, ...)
       ape::nodelabels(node = node.shapes$nodes, 
         bg = node.shapes$colours,
         col = opts$node.border,
@@ -459,7 +492,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
       labx <- (leg$pos[1] + leg$pos[3]) / 2
       laby <- leg$pos[4] + strheight("M")
       text(labx, laby, leg.tit$node_leg)
-    plotPhylo(tree)
+    plotPhylo(tree, ...)
       ape::edgelabels(edge = branch.shapes$nodes, 
         bg = branch.shapes$colours,
         col = opts$branch.border, 
@@ -476,7 +509,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
   } else if (opts$transformation == "rate" && opts$rates.mode == "nodes_brancehs") {
     # plot node and branch labels together
   } else if (opts$transformation == "rate" && opts$rates.mode == "nodes") {
-    plotPhylo(tree)
+    plotPhylo(tree, ...)
     ape::nodelabels(node = node.shapes$nodes, 
       bg = node.shapes$colours,
       col = opts$node.border,
@@ -489,7 +522,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     laby <- leg$pos[4] + strheight("M")
     text(labx, laby, leg.tit$node_leg)
   } else if (opts$transformation == "rate" && opts$rates.mode == "branches"){
-    plotPhylo(tree)
+    plotPhylo(tree, ...)
     ape::edgelabels(edge = branch.shapes$nodes, 
       bg = branch.shapes$colours,
       col = opts$branch.border, 
@@ -502,7 +535,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     laby <- leg$pos[4] + strheight("M")
     text(labx, laby, leg.tit$branch_leg)
   } else if (opts$transformation == "rate" && opts$rates.mode == "rates") {
-    plotPhylo(tree, edge.col = edge.cols$edge.cols)
+    plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
     leg <- legendInfo(tree, opts, edge.cols)
     plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
       leg$legend, rect.col = edge.cols$scale.cols, align = "rb")
@@ -512,7 +545,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
   } else if (opts$transformation == "delta" | 
              opts$transformation == "kappa" |
              opts$transformation == "lambda") {
-    plotPhylo(tree)
+    plotPhylo(tree, ...)
     ape::nodelabels(node = node.shapes$nodes, 
       bg = node.shapes$colours,
       col = opts$node.border,
