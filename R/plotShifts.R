@@ -402,6 +402,10 @@ plotShifts <- function(PP, plot.options = list(), ...) {
   # TODO. Depending on the pch code the call to set the colours could be 
   # different - e.g. 21 has bg for the fill colour and col for the border colour
   # whereas borderless symbols just have col.
+  # TODO - Fix transformation = "rates" comparison
+  # TODO - Fix user palette specification
+  # TODO - include option to plot node labels for specified node(s).
+  # TODO - change scale bar and legend position for fan phylogenies.
 
   transformation <- names(PP$origins)
   if ("nodes" %in% transformation) {
