@@ -47,9 +47,18 @@ branchColours <- function(PP, opts) {
 
   if (opts$edge.colour != "none") {
     xx <- plot.dat[[opts$edge.colour]]
-    edge.cols <- colourvalues::colour_values(xx, palette = opts$edge.palette)
+    if (length(opts$edge.palette) > 1) {
+      edge.cols <- plotrix::color.scale(xx, extremes = opts$edge.palette)
+    } else {
+      edge.cols <- colourvalues::colour_values(xx, palette = opts$edge.palette)  
+    }    
     ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
-    scale.cols <- colourvalues::colour_values(ss, palette = opts$edge.palette)
+    if (length(opts$edge.palette) > 1) {
+      edge.cols <- plotrix::color.scale(ss, extremes = opts$edge.palette)            
+    } else {
+      scale.cols <- colourvalues::colour_values(ss, palette = opts$edge.palette)
+    }
+    
     scale.lims <- range(ss)
   } else if (opts$edge.colour == "none") {
     edge.cols <- rep("black", length(xx))
@@ -90,9 +99,18 @@ shapeCols <- function(opts, plot.dat, mode) {
       scale.lims <- c(0, 0)
     } else {
       xx <- plot.dat[[opts$node.colour]]
-      cols <- colourvalues::colour_values(xx, palette = opts$node.palette)
+      if (length(opts$node.palette) > 1) {
+        cols <- plotrix::color.scale(xx, extremes = opts$node.palette)
+      } else {
+        cols <- colourvalues::colour_values(xx, palette = opts$node.palette)
+      }
       ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
-      scale.cols <- colourvalues::colour_values(ss, palette = opts$node.palette)
+      if (length(opts$node.palette) > 1) {
+        scale.cols <- plotrix::color.scale(ss, extremes = opts$node.palette)
+      } else {
+        scale.cols <- colourvalues::colour_values(ss, 
+          palette = opts$node.palette)
+      }      
       scale.lims <- range(ss)
     }
   } else if (mode == "branches") {
@@ -101,10 +119,18 @@ shapeCols <- function(opts, plot.dat, mode) {
       scale.lims <- c(0, 0)
     } else {
       xx <- plot.dat[[opts$branch.colour]]
-      cols <- colourvalues::colour_values(xx, palette = opts$branch.palette)
+      if (length(opts$branch.palette) > 1) {
+        cols <- plotrix::color.scale(xx, extremes = opts$branch.palette)
+      } else {
+        cols <- colourvalues::colour_values(xx, palette = opts$branch.palette)
+      }
       ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
-      scale.cols <- colourvalues::colour_values(ss, 
-        palette = opts$branch.palette)
+      if (length(opts$branch.palette) > 1) {
+        scale.cols <- plotrix::color.scale(ss, extremes = opts$branch.palette)
+      } else {
+        scale.cols <- colourvalues::colour_values(ss, 
+          palette = opts$branch.palette)
+      }      
       scale.lims <- range(ss)
     }
   }
@@ -197,13 +223,21 @@ plotShapes <- function(PP, opts, mode) {
 
     if (mode == "nodes") {
       if (opts$node.scale != "none") {
-        pcex <- opts$node.cex * plot.dat[[opts$node.scale]]
+        scl <- plot.dat[[opts$node.scale]]
+        if (any(scl < 0)) {
+          scl <- scl + min(scl)
+        }
+        pcex <- opts$node.cex * scl
       } else {
         pcex <- opts$node.cex
       }
     } else if (mode == "branches") {
       if (opts$branch.scale != "none") {
-        pcex <- opts$node.cex * plot.dat[[opts$branch.scale]]
+        scl <- plot.dat[[opts$branch.scale]]
+        if (any(scl < 0)) {
+          scl <- scl + min(scl)
+        }
+        pcex <- opts$node.cex * scl
       } else {
         pcex <- opts$branch.cex
       }
@@ -358,8 +392,8 @@ scaleTree <- function(PP, opts) {
 #' end. Any other colours in the vector will be included in the gradient.}
 #' \item{node.fill:}{ []}
 #' \item{node.border:}{ []}
-#' \item{node.shape:}{ [any pch code] The pch code for the symbols to plot as
-#' node labels - standard R pch coding system.}
+#' \item{node.shape:}{ ["circle"] The shape for the node labels - "circle",
+#' "square", "diamond", "uptriangle", "downtriangle".}
 #' \item{node.cex:}{ [0-??] The scaling factor for node symbols. This is the 
 #' scaling factor that the symbols start at before any subsequent scaling (i.e.
 #' if a node symbol receives no scaling, this is what it's scaling factor will
@@ -374,8 +408,8 @@ scaleTree <- function(PP, opts) {
 #' \item{branch.fill:}{ []}
 #' \item{branch.border:}{ []}
 #' \item{branch.scale:}{ []}
-#' \item{branch.shape:}{ [any pch code] The pch code for the symbols to plot as
-#' branch labels - standard R pch coding system.}
+#' \item{branch.shape:}{ ["circle"] The shape for the branch labels - "circle",
+#' "square", "diamond", "uptriangle", "downtriangle".}
 #' \item{branch.cex:}{ [0-??] The scaling factor for branch symbols. This is the 
 #' scaling factor that the symbols start at before any subsequent scaling (i.e.
 #' if a branch symbol receives no scaling, this is what it's scaling factor will
@@ -403,15 +437,6 @@ scaleTree <- function(PP, opts) {
 
 plotShifts <- function(PP, plot.options = list(), ...) {
 
-  # TODO. Work out what to do when scaling factors are negative (e.g. from 
-  # logged data). Just add 1? I think first finish the function and then see 
-  # what comes out with different options, see if it makes sense etc.
-  # For SOME reason the colour scaling for the nodes and branches has gone out
-  # of whack again - fix.
-  # TODO. Depending on the pch code the call to set the colours could be 
-  # different - e.g. 21 has bg for the fill colour and col for the border colour
-  # whereas borderless symbols just have col.
-  # TODO - Fix transformation = "rates" comparison
   # TODO - Fix user palette specification
   # TODO - include option to plot node labels for specified node(s).
   # TODO - change scale bar and legend position for fan phylogenies.
@@ -437,7 +462,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     node.palette = "plasma",
     node.fill = "red",
     node.border = "black",
-    node.shape = 21,
+    node.shape = "circle",
     node.cex = 2,
     branch.colour = "mean",
     branch.transparency = "none",
@@ -445,7 +470,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     branch.fill = "red",
     branch.border = "black",
     branch.scale = "none",
-    branch.shape = 22,
+    branch.shape = "diamond",
     branch.cex = 2,
     na.colour = "black",
     layout = c("e", "n", "b"),
@@ -453,6 +478,13 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     legend = "numeric"
   )
   opts[names(plot.options)] <- plot.options
+
+  # set pch for the node and branch labels.
+  opts <- gsub("circle", 21, opts)
+  opts <- gsub("square", 22, opts)
+  opts <- gsub("diamond", 23, opts)
+  opts <- gsub("uptriangle", 24, opts)
+  opts <- gsub("downtriangle", 25, opts)
 
   if (length(opts$transformation) >1 ) {
     message("Multiple transformations detected. Please select one to plot:")
@@ -482,8 +514,6 @@ plotShifts <- function(PP, plot.options = list(), ...) {
 
   tree <- scaleTree(PP, opts)
   leg.tit <- makeLegendTitle(opts)
-
-  # now use layout to determine what needs to be plotted.
   panels <- strsplit(opts$layout, "")
   par(mfrow = c(1, length(panels)))
 

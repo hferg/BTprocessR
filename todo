@@ -1,4 +1,3 @@
-1) complete plotshifts (plotting rates in different combinations, plus minor todos in plotshifts.R)
 2) incoporate reading of fixed rates, and including them in the output of rjpp (i.e. making sure they are always represented in the esimates). This is harder - perhaps not doable? - for transformations.
 3) incoporate the detection and plotting of reconstructed ancestral states
 4) tree-slicing plots, i.e. rates through time and traits through time (only if full ancestral state reconstruction is provided - need to incorporate a check for that).

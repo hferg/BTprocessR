@@ -68,8 +68,8 @@ specified - the first will be the low end of the palette and the last the top
 end. Any other colours in the vector will be included in the gradient.}
 \item{node.fill:}{ []}
 \item{node.border:}{ []}
-\item{node.shape:}{ [any pch code] The pch code for the symbols to plot as
-node labels - standard R pch coding system.}
+\item{node.shape:}{ ["circle"] The shape for the node labels - "circle",
+"square", "diamond", "uptriangle", "downtriangle".}
 \item{node.cex:}{ [0-??] The scaling factor for node symbols. This is the 
 scaling factor that the symbols start at before any subsequent scaling (i.e.
 if a node symbol receives no scaling, this is what it's scaling factor will
@@ -84,8 +84,8 @@ end. Any other colours in the vector will be included in the gradient.}
 \item{branch.fill:}{ []}
 \item{branch.border:}{ []}
 \item{branch.scale:}{ []}
-\item{branch.shape:}{ [any pch code] The pch code for the symbols to plot as
-branch labels - standard R pch coding system.}
+\item{branch.shape:}{ ["circle"] The shape for the branch labels - "circle",
+"square", "diamond", "uptriangle", "downtriangle".}
 \item{branch.cex:}{ [0-??] The scaling factor for branch symbols. This is the 
 scaling factor that the symbols start at before any subsequent scaling (i.e.
 if a branch symbol receives no scaling, this is what it's scaling factor will
