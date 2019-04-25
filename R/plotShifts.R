@@ -233,11 +233,12 @@ legendInfo <- function(tree, opts, cols) {
     pos <- c(0, 
       0, 
       round((max(ape::node.depth.edgelength(tree)) / 4), 2),
-      round((length(tree$tip.label) / 30), 2))
+      round((length(tree$tip.label) / 60), 2))
   } else {
     pos <- opts$legend.pos
   }
-  return(list(legend = leg, pos = pos))
+  return(list(legend = leg, pos = pos, cols = cols$scale.cols, 
+    lims = cols$scale.lims))
 }
 
 ##############################################################################
@@ -380,7 +381,15 @@ scaleTree <- function(PP, opts) {
 #' if a branch symbol receives no scaling, this is what it's scaling factor will
 #' be.}
 #' \item{na.colour:}{ []}
-#' \item{rates.mode:}{ []}
+#' \item{layou:}{ [c("e", "n", "b")] This controls the layout of the plots. The
+#' option takes the form of a vector of letters - "e", "n" and/or "b". Each 
+#' element of the vector is a new panel in the plot, and the composition of
+#' letters in the element determins whether coloured edges - "e" - node labels -
+#' "n" - and/or branch labels - "b" - are plotted. e.g. c("e", "n", "b") gives a
+#' three panel plot - one panel with coloured edges, one with node labels and 
+#' one with branch labels. c("en", "b") produces two plots - one with coloured
+#' edges and node labels and one with branch labels. c("enb") produces a single
+#' plot with edges, node labels and branch labels.}
 #' \item{legend.pos:}{ [auto, c(xl, yb, xr, yt)] The legend position on the 
 #' plot. If "auto" then the legend position will be in the bottom right at 
 #' "best guess" coordinates. Otherwise a vector of coordinates for bottom left
@@ -425,21 +434,21 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     node.colour = "mean",
     node.scale = "none",
     node.transparency = "none",
-    node.palette = "viridis",
+    node.palette = "plasma",
     node.fill = "red",
     node.border = "black",
     node.shape = 21,
     node.cex = 2,
     branch.colour = "mean",
     branch.transparency = "none",
-    branch.palette = "viridis",
+    branch.palette = "cividis",
     branch.fill = "red",
     branch.border = "black",
     branch.scale = "none",
     branch.shape = 22,
     branch.cex = 2,
     na.colour = "black",
-    rates.mode = "all_panel",
+    layout = c("e", "n", "b"),
     legend.pos = "auto",
     legend = "numeric"
   )
@@ -451,115 +460,92 @@ plotShifts <- function(PP, plot.options = list(), ...) {
   }
 
   if (opts$transformation == "rate") {
-    if (opts$rates.mode == "all_panel" | 
-        opts$rates.mode == "all_single" | 
-        opts$rates.mode == "rates") {
-      edge.cols <- branchColours(PP, opts)
-    }
-
-    if (opts$rates.mode == "nodes" | opts$rates.mode == "nodes_branches" | 
-      opts$rates.mode == "all_single" | opts$rates.mode == "all_panel") {
-      node.shapes <- plotShapes(PP, opts, mode = "nodes")
-    }
-
-    if (opts$rates.mode == "branches" | opts$rates.mode == "nodes_branches" | 
-      opts$rates.mode == "all_panel" | opts$rates.mode == "all_single") {
-      branch.shapes <- plotShapes(PP, opts, mode = "branches")
-    }
-
+    edge.cols <- branchColours(PP, opts)
+    node.shapes <- plotShapes(PP, opts, mode = "nodes")
+    branch.shapes <- plotShapes(PP, opts, mode = "branches")
   } else if (opts$transformation == "delta" | opts$transformation == "lamba" |
     opts$tranformation == "kappa") {
+    if (opts$edge.colour != "none") {
+      edge.cols <- branchColours(PP, opts)
+    }
     node.shapes <- plotShapes(PP, opts, mode = "nodes")
+    # Default to a layout of "en" rather than c("e", "n", "b") - unless the
+    # user has specified a layout.
+    if (!"layout" %in% names(plot.options)) {
+      if (opts$edge.colour != "none") {
+        opts$layout <- "en"
+      } else {
+        opts$layout <- "n"
+      }
+    }
   }
 
   tree <- scaleTree(PP, opts)
   leg.tit <- makeLegendTitle(opts)
 
-  if (opts$transformation == "rate" && opts$rates.mode == "all_panel") {
-    par(mfrow = c(1, 3))
-    plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
-      leg <- legendInfo(tree, opts, edge.cols)
-      plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-        leg$legend, rect.col = edge.cols$scale.cols, align = "rb")
+  # now use layout to determine what needs to be plotted.
+  panels <- strsplit(opts$layout, "")
+  par(mfrow = c(1, length(panels)))
+
+  for (i in seq_along(panels)) {
+    content <- panels[[i]]
+    legends <- list()
+    if ("e" %in% content) {
+      plotPhylo(tree, edge.col = edge.cols$edge.cols)
+      content <- content[!content == "e"]
+      legends <- append(legends, 
+        list(c(legendInfo(tree, opts, edge.cols), label = "Edges:",
+          title = leg.tit$edge_leg))
+      )
+    } else {
+      plotPhylo(tree)
+    }
+    for (j in seq_along(content)) {
+      if (content[j] == "n") {
+        ape::nodelabels(node = node.shapes$nodes, 
+          bg = node.shapes$colours,
+          col = opts$node.border,
+          cex = node.shapes$nodecex, 
+          pch = opts$node.shape)
+        legends <- append(legends,
+          list(c(legendInfo(tree, opts, node.shapes), label = "Nodes: ",
+            title = leg.tit$node_leg))
+        ) 
+      } else if (content[j] == "b") {
+        ape::edgelabels(edge = branch.shapes$nodes, 
+          bg = branch.shapes$colours,
+          col = opts$branch.border, 
+          cex = branch.shapes$nodecex, 
+          pch = opts$branch.shape)
+        legends <- append(legends, 
+          list(c(legendInfo(tree, opts, branch.shapes), label = "Branches: ",
+            title = leg.tit$branch_leg))
+        )
+      }
+    }
+    legends <- rev(legends)
+
+    for (j in seq_along(legends)) {
+      leg <- legends[[j]]
+      if (j > 1) {
+        leg$pos[2] <- prev + (strheight("H") * 2)
+        leg$pos[4] <- leg$pos[2] + legends[[1]]$pos[4]
+        prev <- leg$pos[4]
+      } else {
+        prev <- leg$pos[4]
+      }
+      plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4],
+        leg$legend, rect.col = leg$cols, align = "rb")
       labx <- (leg$pos[1] + leg$pos[3]) / 2
-      laby <- leg$pos[4] + strheight("M")
-      text(labx, laby, leg.tit$edge_leg)
-    plotPhylo(tree, ...)
-      ape::nodelabels(node = node.shapes$nodes, 
-        bg = node.shapes$colours,
-        col = opts$node.border,
-        cex = node.shapes$nodecex, 
-        pch = opts$node.shape)
-      leg <- legendInfo(tree, opts, node.shapes)
-      plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-            leg$legend, rect.col = node.shapes$scale.cols, align = "rb")
-      labx <- (leg$pos[1] + leg$pos[3]) / 2
-      laby <- leg$pos[4] + strheight("M")
-      text(labx, laby, leg.tit$node_leg)
-    plotPhylo(tree, ...)
-      ape::edgelabels(edge = branch.shapes$nodes, 
-        bg = branch.shapes$colours,
-        col = opts$branch.border, 
-        cex = branch.shapes$nodecex, 
-        pch = opts$branch.shape)
-      leg <- legendInfo(tree, opts, branch.shapes)
-      plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-        leg$legend, rect.col = branch.shapes$scale.cols, align = "rb")
-      labx <- (leg$pos[1] + leg$pos[3]) / 2
-      laby <- leg$pos[4] + strheight("M")
-      text(labx, laby, leg.tit$branch_leg)
-  } else if (opts$transformation == "rate" && opts$rates.mode == "all_single") {
-    # Plot all on single plot
-  } else if (opts$transformation == "rate" && opts$rates.mode == "nodes_brancehs") {
-    # plot node and branch labels together
-  } else if (opts$transformation == "rate" && opts$rates.mode == "nodes") {
-    plotPhylo(tree, ...)
-    ape::nodelabels(node = node.shapes$nodes, 
-      bg = node.shapes$colours,
-      col = opts$node.border,
-      cex = node.shapes$nodecex, 
-      pch = opts$node.shape)
-    leg <- legendInfo(tree, opts, node.shapes)    
-    plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-          leg$legend, rect.col = node.shapes$scale.cols, align = "rb")
-    labx <- (leg$pos[1] + leg$pos[3]) / 2
-    laby <- leg$pos[4] + strheight("M")
-    text(labx, laby, leg.tit$node_leg)
-  } else if (opts$transformation == "rate" && opts$rates.mode == "branches"){
-    plotPhylo(tree, ...)
-    ape::edgelabels(edge = branch.shapes$nodes, 
-      bg = branch.shapes$colours,
-      col = opts$branch.border, 
-      cex = branch.shapes$nodecex, 
-      pch = opts$branch.shape)
-    leg <- legendInfo(tree, opts, branch.shapes)
-    plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-      leg$legend, rect.col = branch.shapes$scale.cols, align = "rb")
-    labx <- (leg$pos[1] + leg$pos[3]) / 2
-    laby <- leg$pos[4] + strheight("M")
-    text(labx, laby, leg.tit$branch_leg)
-  } else if (opts$transformation == "rate" && opts$rates.mode == "rates") {
-    plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
-    leg <- legendInfo(tree, opts, edge.cols)
-    plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-      leg$legend, rect.col = edge.cols$scale.cols, align = "rb")
-    labx <- (leg$pos[1] + leg$pos[3]) / 2
-    laby <- leg$pos[4] + strheight("M")
-    text(labx, laby, leg.tit$edge_leg)
-  } else if (opts$transformation == "delta" | 
-             opts$transformation == "kappa" |
-             opts$transformation == "lambda") {
-    plotPhylo(tree, ...)
-    ape::nodelabels(node = node.shapes$nodes, 
-      bg = node.shapes$colours,
-      col = opts$node.border,
-      cex = node.shapes$nodecex, 
-      pch = opts$node.shape)
-    leg <- legendInfo(tree, opts, node.shapes)
-    plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4], 
-      leg$legend, rect.col = node.shapes$scale.cols, align = "rb")
-    labx <- (leg$pos[1] + leg$pos[3]) / 2
-    laby <- leg$pos[4] + strheight("M")
-    text(labx, laby, leg.tit$node_leg)
+      laby <- leg$pos[4] + strheight("H")
+      if (length(legends) == 1) {
+        text(labx, laby, leg$title)
+      } else {
+        text(labx, laby, paste0(leg$label, leg$title))
+      }
+    }
   }
+
+  # reset the pane layout
+  par(mfrow = c(1,1))
 }
