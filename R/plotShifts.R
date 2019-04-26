@@ -47,18 +47,14 @@ branchColours <- function(PP, opts) {
 
   if (opts$edge.colour != "none") {
     xx <- plot.dat[[opts$edge.colour]]
-    if (length(opts$edge.palette) > 1) {
-      edge.cols <- plotrix::color.scale(xx, extremes = opts$edge.palette)
-    } else {
-      edge.cols <- colourvalues::colour_values(xx, palette = opts$edge.palette)  
-    }    
     ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
     if (length(opts$edge.palette) > 1) {
-      edge.cols <- plotrix::color.scale(ss, extremes = opts$edge.palette)            
+      edge.cols <- plotrix::color.scale(xx, extremes = opts$edge.palette)
+      scale.cols <- plotrix::color.scale(ss, extremes = opts$edge.palette)
     } else {
+      edge.cols <- colourvalues::colour_values(xx, palette = opts$edge.palette)  
       scale.cols <- colourvalues::colour_values(ss, palette = opts$edge.palette)
-    }
-    
+    }    
     scale.lims <- range(ss)
   } else if (opts$edge.colour == "none") {
     edge.cols <- rep("black", length(xx))
@@ -99,18 +95,15 @@ shapeCols <- function(opts, plot.dat, mode) {
       scale.lims <- c(0, 0)
     } else {
       xx <- plot.dat[[opts$node.colour]]
-      if (length(opts$node.palette) > 1) {
-        cols <- plotrix::color.scale(xx, extremes = opts$node.palette)
-      } else {
-        cols <- colourvalues::colour_values(xx, palette = opts$node.palette)
-      }
       ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
       if (length(opts$node.palette) > 1) {
+        cols <- plotrix::color.scale(xx, extremes = opts$node.palette)
         scale.cols <- plotrix::color.scale(ss, extremes = opts$node.palette)
       } else {
+        cols <- colourvalues::colour_values(xx, palette = opts$node.palette)
         scale.cols <- colourvalues::colour_values(ss, 
           palette = opts$node.palette)
-      }      
+      }
       scale.lims <- range(ss)
     }
   } else if (mode == "branches") {
@@ -119,18 +112,15 @@ shapeCols <- function(opts, plot.dat, mode) {
       scale.lims <- c(0, 0)
     } else {
       xx <- plot.dat[[opts$branch.colour]]
-      if (length(opts$branch.palette) > 1) {
-        cols <- plotrix::color.scale(xx, extremes = opts$branch.palette)
-      } else {
-        cols <- colourvalues::colour_values(xx, palette = opts$branch.palette)
-      }
       ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
       if (length(opts$branch.palette) > 1) {
+        cols <- plotrix::color.scale(xx, extremes = opts$branch.palette)
         scale.cols <- plotrix::color.scale(ss, extremes = opts$branch.palette)
       } else {
+        cols <- colourvalues::colour_values(xx, palette = opts$branch.palette)
         scale.cols <- colourvalues::colour_values(ss, 
           palette = opts$branch.palette)
-      }      
+      }
       scale.lims <- range(ss)
     }
   }
@@ -227,9 +217,9 @@ plotShapes <- function(PP, opts, mode) {
         if (any(scl < 0)) {
           scl <- scl + min(scl)
         }
-        pcex <- opts$node.cex * scl
+        pcex <- as.numeric(opts$node.cex) * scl
       } else {
-        pcex <- opts$node.cex
+        pcex <- as.numeric(opts$node.cex)
       }
     } else if (mode == "branches") {
       if (opts$branch.scale != "none") {
@@ -237,9 +227,9 @@ plotShapes <- function(PP, opts, mode) {
         if (any(scl < 0)) {
           scl <- scl + min(scl)
         }
-        pcex <- opts$node.cex * scl
+        pcex <- as.numeric(opts$node.cex) * scl
       } else {
-        pcex <- opts$branch.cex
+        pcex <- as.numeric(opts$branch.cex)
       }
     }
     ret <- list(nodes = as.numeric(nodes), 
@@ -437,7 +427,7 @@ scaleTree <- function(PP, opts) {
 
 plotShifts <- function(PP, plot.options = list(), ...) {
 
-  # TODO - Fix user palette specification
+  # TODO - check the cex values for nodes/branches - seem to be messed up.
   # TODO - include option to plot node labels for specified node(s).
   # TODO - change scale bar and legend position for fan phylogenies.
 
@@ -480,11 +470,10 @@ plotShifts <- function(PP, plot.options = list(), ...) {
   opts[names(plot.options)] <- plot.options
 
   # set pch for the node and branch labels.
-  opts <- gsub("circle", 21, opts)
-  opts <- gsub("square", 22, opts)
-  opts <- gsub("diamond", 23, opts)
-  opts <- gsub("uptriangle", 24, opts)
-  opts <- gsub("downtriangle", 25, opts)
+  opts <- lapply(opts, function(x) gsub("circle", 21, x))
+  opts <- lapply(opts, function(x) gsub("diamond", 23, x))
+  opts <- lapply(opts, function(x) gsub("uptriangle", 24, x))
+  opts <- lapply(opts, function(x) gsub("downtriangle", 25, x))
 
   if (length(opts$transformation) >1 ) {
     message("Multiple transformations detected. Please select one to plot:")
@@ -536,7 +525,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
           bg = node.shapes$colours,
           col = opts$node.border,
           cex = node.shapes$nodecex, 
-          pch = opts$node.shape)
+          pch = as.numeric(opts$node.shape))
         legends <- append(legends,
           list(c(legendInfo(tree, opts, node.shapes), label = "Nodes: ",
             title = leg.tit$node_leg))
@@ -546,7 +535,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
           bg = branch.shapes$colours,
           col = opts$branch.border, 
           cex = branch.shapes$nodecex, 
-          pch = opts$branch.shape)
+          pch = as.numeric(opts$branch.shape))
         legends <- append(legends, 
           list(c(legendInfo(tree, opts, branch.shapes), label = "Branches: ",
             title = leg.tit$branch_leg))
