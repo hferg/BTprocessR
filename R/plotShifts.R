@@ -388,7 +388,7 @@ scaleTree <- function(PP, opts) {
 #' scaling factor that the symbols start at before any subsequent scaling (i.e.
 #' if a node symbol receives no scaling, this is what it's scaling factor will
 #' be.)}
-#' \itvem{branch.colour:}{ []}
+#' \item{branch.colour:}{ []}
 #' \item{branch.transparency:}{ []}
 #' \item{branch.palette:}{ [viridis, magma, inferno, plasma, viridis, 
 #' c("<colour1>", "<colour2>")] The colour palette for branch symbols. If not 
