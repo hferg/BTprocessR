@@ -293,12 +293,32 @@ rjpp <- function(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   if (verbose) {
     cat("Loading posterior logfile.\n")
   }
-  log <- loadPosterior(logfile, burnin = burnin, thinning = thinning)
+  log <- readLines(logfile)
+
+  if (length(grep("Tags", log)) > 0) {
+    if (length(grep("Local Rates", log)) > 0) {
+      if (verbose) {
+        cat("Local rates detected.\n")
+      }
+
+      # get the tags, identify the node that the tags refer to.
+      ts <- grep("Tags", log)
+      te <- grep("Local Rates", log)
+
+      # identify the type(s) of local transformation.
+
+      # get the estiamtes for that local transformation and store for later.
+
+    }
+  }
 
   # Now look for tags.
   # If found, find the nodes that they are specific to.
   # Then find out if Local Rates are present.
-  # If they are, find out if the tag is for a branch or node scalar.
+  # If they are, find out if the tag is for a branch or node scalar, or a delta,
+  # kappa or lambda.
+
+
 
   # then make a note of this so that those scalars can be added in to the
   # origins and rates tables later on (the values will be coming from the
