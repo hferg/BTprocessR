@@ -10,6 +10,15 @@
 
 loadRJ <- function(logfile, burnin = 0, thinning = 1) {
 
+  # New feature from Jo.
+  # The problem. When scalar is manually inserted for a node (i.e. a tag is
+  # defined and the rate estimated for that node ALL the time) the rates are
+  # in the logfile, and not the varrates output file. This, when present, needs
+  # to be reflected in the output of rjpp, and also checked to see if the
+  # scaled trees do, or don't, include this fixed-node estimate (I suspect
+  # that they do - this should be pretty checkable, though, by calculating the
+  # scaled branch lengths and then comparing to the posterior of trees).
+
   raw <- readLines(logfile)
   rawhead <- strsplit(raw[1:(grep("\\bIt*\\b", raw) -1)], "\t")
   rawtail <- strsplit(raw[grep("\\bIt*\\b", raw):length(raw)], "\t")
@@ -106,16 +115,6 @@ createCountsTable <- function(reftree) {
     "species"
   )
 
-  # notes.
-  # itersX and nX are effectively the same, except in the case of rates, where
-  # the number of rates breaks down into branch and node. That means I don't
-  # need the "iters" family of names.
-  # make sure to fill in SD for each scalar.
-  # equally I think the "origin" columns can be dropped - they are only there
-  # for the node and branch scalars. Instead I could have the measurements for
-  # node and branch scalars, and then the same for total scalar (the cumulative
-  # effect of all linear scalars.)
-
     species_key <- vector(mode = "list", length = nrow(counts))
     counts[ , "node_id"] <- names(species_key) <- 
       paste0("node_", c(0:nrow(reftree$edge)))
@@ -194,15 +193,11 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
     names(Kappa) <- names(Node_effects) <- counts[ , "descNode"]
 
   print("Searching for scalars...")
-    # I want to really turn this into a function so that I can use the 
-    # same progress bar style - can it be done with apply?
     if (verbose) {
       pb <- pbapply::startpb(0, nrow(rj_output))
     }
     
     for (i in 1:nrow(rj_output)) {
-      # This step is extremely slow - I wonder if keeping rj_output as a long 
-      # list, rather than smartBinding it might help.
       lastrates <- rj_output[i, !is.na(rj_output[i, ])]
       
       # If the number of columns is seven, there are no scalars applied this 
@@ -224,9 +219,6 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
         alltypes[[i]] <- types
         allmrcas[[i]] <- mrcas
 
-        # Is this for-loop filling the scalar objects? Do I need to make them 
-        # within this function? I wonder if this could be an after-the-fact 
-        # function...
         for (j in seq_along(mrcas)) {
           nm <- paste0(
             types[j], "[[\"", as.character(mrcas[j]), "\"]]", "[", i, "]"
@@ -263,7 +255,6 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
 #' @keywords internal
 
 multiplyNodes <- function(scales, name, tree, Node_effects) {
-  # get descendents
   descs <- c(getDescs(tree, name), as.numeric(name))
   .tmp <- lapply(Node_effects[as.character(descs)], function(x) x * scales)
   return(.tmp)
@@ -274,6 +265,8 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 #'
 #' A function that takes the output of a kappa, lambda, delta, VRates etc. RJ 
 #' bayesTraits run and runs post-processing on it.
+#' @param logfile The posterior distribution of likelihoods and parameter
+#' estimates for the run (typically suffixed with .Log.txt)
 #' @param rjlog The RJ output of the run - typically suffixed with .VarRates.txt
 #' @param rjtrees 
 #' @param tree The time tree the analysis was run on as an object of class 
@@ -286,7 +279,7 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 #' @export
 #' @name rjpp
 
-rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
+rjpp <- function(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
    verbose = TRUE) {
   pbapply::pboptions(type = "timer", style = 3, char = "*")
 
@@ -296,17 +289,29 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     reftree <- ape::ladderize(ape::read.nexus(tree))
   }
 
+  # Load the logfile
   if (verbose) {
-    print("Loading log file.")
+    cat("Loading posterior logfile.\n")
+  }
+  log <- loadPosterior(logfile, burnin = burnin, thinning = thinning)
+
+  # Now look for tags.
+  # If found, find the nodes that they are specific to.
+  # Then find out if Local Rates are present.
+  # If they are, find out if the tag is for a branch or node scalar.
+
+  # then make a note of this so that those scalars can be added in to the
+  # origins and rates tables later on (the values will be coming from the
+  # posterior log).
+
+  if (verbose) {
+    cat("Loading RJ log file.\n")
   }
   rjout <- loadRJ(rjlog, burnin = burnin, thinning = thinning)
 
   if (verbose) {
-    print("Loading posterior trees.")
-  }
-
-  if (verbose) {
-    print("Calculating mean branch lengths.")
+    cat("Loading posterior trees.\n")
+    cat("Calculating mean branch lengths.\n")
   }
 
   tree_summary <- summariseTrees(reftree = reftree, trees = rjtrees, 
@@ -318,7 +323,7 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   niter <- nrow(rj_output)
   
   if (verbose) {
-    print("Finding taxa.")
+    cat("Finding taxa.\n")
   }
   
   if (verbose) {
@@ -329,7 +334,7 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   }
   
   if (verbose) {
-    print("Calculating MRCAs.")
+    cat("Calculating MRCAs.\n")
     fullmrcas <- unlist(
       pbapply::pblapply(taxa, function(x) {
         getMRCAbtr(x , tree = reftree, rjtaxa = rjtaxa)
@@ -367,7 +372,6 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     function(x) all_scalars$Node_effects[[x]] * all_scalars$Branch[[x]])
   names(all_scalars$Node_effects) <- counts[ , "descNode"]
   
-  # The node effects object now becomes "rates".
   origins <- list(nodes = do.call(rbind, all_scalars$Node), 
                   branches = do.call(rbind, all_scalars$Branch), 
                   delta = do.call(rbind, all_scalars$Delta),
@@ -497,20 +501,9 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   origins <- lapply(origins, tibble::as_tibble)
 
   res <- c(res, list(origins = origins), niter = niter)
-
-  # NOTE: Plotshifts probably has too many different versions to just be a
-  # a method actually... Although it could always just return a message if there
-  # isn't, for example, a scalar or transformation selected?
   class(res) <- append("rjpp", class(res))
   return(res)
 }
-
-# NEW PLAN.
-# If there is a custom print method for the output of rjpp, then I can have some
-# outputs in the rjpp output which can be some tables of the information 
-# required to plot the shifts and whatnot - then I just need to have some custom
-# plot methods for the rjpp output - I think this is definitely worth trying...
-
 
 #' summariseRjpp
 #' This functions takes the somewhat massive output of the rjpp function and
@@ -531,10 +524,3 @@ rjpp <- function(rjlog, rjtrees, tree, burnin = 0, thinning = 1,
 summariseRjpp <- function(PP, scalar) {
 
 }
-
-
-
-## TODO
-# for some reason rates is empty, even from a variable rates analysis. This
-# shouldn't be - this should contain the per-branch rates, surely?! Check!
-
