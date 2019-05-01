@@ -471,6 +471,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
 
   # set pch for the node and branch labels.
   opts <- lapply(opts, function(x) gsub("circle", 21, x))
+  opts <- lapply(opts, function(x) gsub("square", 22, x))
   opts <- lapply(opts, function(x) gsub("diamond", 23, x))
   opts <- lapply(opts, function(x) gsub("uptriangle", 24, x))
   opts <- lapply(opts, function(x) gsub("downtriangle", 25, x))

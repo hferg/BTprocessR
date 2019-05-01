@@ -7,7 +7,7 @@ Reads the ancestral states from a posterior containing ancestral state
 estimates and returns the mean, median and mode ancestral state, as well as 
 the SD of estimates, for each of the tagged nodes in the posterior.}
 \usage{
-getAncStates(logfile, tree, burnin = 1, thinning = 0)
+getAncStates(logfile, tree, burnin = 0, thinning = 1)
 }
 \arguments{
 \item{logfile}{The filename of a posterior that contains ancestral states.}

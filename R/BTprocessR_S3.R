@@ -198,3 +198,78 @@ print.rjpp <- function(x) {
 plot.rjpp <- function(x, plot.options = list(), ...) {
   plotShifts(x, plot.options = plot.options, ...)
 }
+
+#' a plot method for class ancstates
+#' @method print ancstates
+#' @name print.ancstates
+#' @export
+
+print.ancstates <- function(x) {
+  nn <- nrow(x$states)
+  nt <- length(x$tree$tip.label)
+  ntn <- x$tree$Nnode
+  print(x$states)
+  cat(paste("\nAncestral states for", nn, "nodes of a phylogenetic tree with",
+    nt, "tips and", ntn, "internal nodes.\n\n"))
+}
+
+#' a print method for class ancstates.
+#' @method plot ancstates
+#' @name plot.ancstates
+#' @export
+
+plot.ancstates <- function(x, plot.options = list(), ...) {
+  opts <- list(
+    state = "mean",
+    palette = "plasma",
+    border = "black",
+    shape = "circle",
+    cex = 2,
+    legend.pos = "auto",
+    legend = "numeric",
+    legend.title = NULL
+  )
+  opts[names(plot.options)] <- plot.options
+  if (opts$shape == "circle") {
+    opts$shape <- 21
+  } else if (opts$shape == "sqaure") {
+    opts$shape <- 22
+  } else if (opts$shape == "diamond") {
+    opts$shape <- 23
+  } else if (opts$shape == "uptriangle") {
+    opts$shape <- 24
+  } else if (opts$shape == "downtriangle") {
+    opts$shape <- 25
+  }
+  if (is.null(opts$legend.title)) {
+    opts$legend.title <- "Trait value"
+  }
+  pdat <- x$states[, c("node", opts$state)]
+  xx <- pdat[opts$state][[1]]
+  ss <- seq.int(from = min(xx), to = max(xx), length.out = length(xx))
+  lims <- round(c(min(xx), max(xx)), 2)
+  # make colours, and a scale, and add to the xx tibble.
+  if (length(opts$palette) > 1) {
+    pdat$cols <- plotrix::color.scale(xx, extremes = opts$palette)
+    scale.cols <- plotrix::color.scale(ss, extremes = opts$palette)
+  } else {
+    pdat$cols <- colourvalues::colour_values(xx, palette = opts$palette)
+    scale.cols <- colourvalues::colour_values(ss, palette = opts$palette)
+  }
+  if (opts$legend.pos == "auto") {
+    pos <- c(0, 
+      0, 
+      round((max(ape::node.depth.edgelength(x$tree)) / 4), 2),
+      round((length(x$tree$tip.label) / 60), 2))
+  } else {
+    pos <- opts$legend.pos
+  }
+  plotPhylo(x$tree)
+  ape::nodelabels(node = pdat$node, bg = pdat$cols, col = opts$border,
+    pch = opts$shape, cex = opts$cex)
+  plotrix::color.legend(pos[1], pos[2], pos[3], pos[4],
+    lims, rect.col = scale.cols, align = "rb")
+  labx <- (pos[1] + pos[3]) / 2
+  laby <- pos[4] + strheight("H")
+  text(labx, laby, opts$legend.title)
+}
