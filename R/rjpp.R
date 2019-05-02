@@ -320,6 +320,7 @@ rjpp <- function(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
 
 
 
+
   # then make a note of this so that those scalars can be added in to the
   # origins and rates tables later on (the values will be coming from the
   # posterior log).
