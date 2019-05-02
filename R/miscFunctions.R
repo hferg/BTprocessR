@@ -1,3 +1,15 @@
+#' ilapply
+#' an invisible version of lapply
+#' @name ilapply
+#' @export
+ilapply <- function(X, FUN, ...) invisible(lapply(X, FUN, ...))
+
+#' isapply
+#' an invisible version of sapply
+#' @name isapply
+#' @export
+isapply <- function(X, FUN, ...) invisible(sapply(X, FUN, ...))
+
 #' modeStat
 #' Calculate the mode.
 #' @name modeStat

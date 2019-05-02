@@ -12,7 +12,8 @@ BayesTraits analysis - for more complex analyses (e.g. alternate priors,
 parameter restriction, fixed scalars on nodes, fossilised states etc.) users 
 must write their own control files.}
 \usage{
-makeInfile(tree, data, analysis_name, analysis_path, control = list())
+makeInfile(tree, data, species_col = NULL, analysis_name, analysis_path,
+  job = FALSE, bt.control = list(), job.control = list())
 }
 \arguments{
 \item{tree}{The tree for the analysis to be run on.}
@@ -22,10 +23,10 @@ makeInfile(tree, data, analysis_name, analysis_path, control = list())
 \item{analysis_path}{The file path to put the resultant files in - defaults
 to working directory.}
 
-\item{control}{List of options for BayesTraits.}
-
 \item{analaysis_name}{The name for the analysis - will be prefixed to all
 files generated.}
+
+\item{control}{List of options for BayesTraits.}
 }
 \description{
 makeInfile
