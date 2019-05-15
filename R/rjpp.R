@@ -252,7 +252,7 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
 #' @keywords internal
 
 multiplyNodes <- function(scales, name, tree, Node_effects) {
-  descs <- c(getDescs(tree, name), as.numeric(name))
+  descs <- c(getDescs(tree, as.numeric(name)), as.numeric(name))
   .tmp <- lapply(Node_effects[as.character(descs)], function(x) x * scales)
   return(.tmp)
 }
@@ -392,7 +392,7 @@ rjpp <- function(logfile, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   for (i in 1:length(all_scalars$Node)) {
     .tmp <- multiplyNodes(all_scalars$Node[[i]], 
       names(all_scalars$Node)[i], 
-      tree, 
+      reftree, 
       all_scalars$Node_effects)
     all_scalars$Node_effects[names(.tmp)] <- .tmp
   }
