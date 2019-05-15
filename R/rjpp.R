@@ -304,8 +304,21 @@ rjpp <- function(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
       # get the tags, identify the node that the tags refer to.
       ts <- grep("Tags", log)
       te <- grep("Local Rates", log)
+      lre <- grep("Restrictions", log)
 
+      tags <- log[(ts + 1):(te - 1)]
+      trans <- log[(te + 1):(lre - 1)]
+      tagssp <- strsplit(tags, "\t")
+      tags <- vector(mode = "list", length = length(tagssp))
+      for (i in seq_along(tagssp)) {
+        tips <- strsplit(tagssp[[i]][4], " ")[[1]]
+        tags[[i]] <- list(
+          name = tagssp[[i]][2],
+          node = ape::getMRCA(tree, tips),
+          tips = tips) 
+      }
       # identify the type(s) of local transformation.
+      
 
       # get the estiamtes for that local transformation and store for later.
 

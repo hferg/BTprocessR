@@ -17,17 +17,17 @@
 #' @name makeInfile
 #' @export
 
-makeInfile <- function(tree, data, species_col = NULL, analysis_name, 
-  analysis_path, job = FALSE, bt.control = list(), job.control = list()) {
+makeInfile <- function(tree, data, analysis_name, analysis_path, 
+  species_col = NULL, job = FALSE, bt.control = list(), job.control = list()) {
 
   opts <- list(
     model = "",
     analysis_type = "mcmc",
     varrates = FALSE,
     rjtransform = "none",
-    burnin = 10000000,
-    iterations = 110000000,
-    sample = 20000,
+    burnin = 1000000,
+    iterations = 11000000,
+    sample = 2000,
     stones = c(1000, 5000),
     ancstates = FALSE,
     bayestraits = "BayesTraitsV3",
@@ -81,35 +81,49 @@ makeInfile <- function(tree, data, species_col = NULL, analysis_name,
   # names.
   if (is.null(species_col)) {
     data$species <- rownames(data)
-    species_col <- "species"
+    sc <- "species"
+  } else {
+    sc <- species_col
   }
 
-  tr_n_d <- tree$tip.label[!tree$tip.label %in% data[, species_col]]
-  d_n_tr <- data[, species_col] %in% tree$tip.label
-  tree <- ape::drop.tip(tree, tip = tr_n_d)
+  if (class(tree) == "multiPhylo") {
+    ttree <- tree[[1]]
+  } else {
+    ttree <- tree
+  }
+
+  tr_n_d <- ttree$tip.label[!ttree$tip.label %in% data[, sc]]
+  d_n_tr <- data[, sc] %in% ttree$tip.label
+  if (class(tree) == "phylo") {
+    tree <- ape::drop.tip(tree, tip = tr_n_d)
+  } else if (class(tree) == "multiPhylo") {
+    tree <- lapply(tree, function(x) ape::drop.tip(x, tip = tr_n_d))
+    class(tree) <- "multiPhylo"
+  }
+  
   data <- data[d_n_tr, ]
-  data <- cbind(data[, species_col], data[, colnames(data) != species_col])
+  data <- cbind(data[, sc], data[, colnames(data) != sc])
 
   # translate options into BT format.
   if (opts$model == "cont_random") {
-    opts$ model <- 4
+    opts$model <- 4
   } else if (opts$model == "cont_directional") {
-    opts$ model <- 5
+    opts$model <- 5
   } else if (opts$model ==  "cont_regression") {
-    opts$ model <- 6
+    opts$model <- 6
   } else if (opts$model == "ic") {
-    opts$ model <- 7
+    opts$model <- 7
   } else if (opts$model == "ic_correl") {
-    opts$ model <- 8
+    opts$model <- 8
   } else if (opts$model == "ic_regression") {
-    opts$ model <- 9
+    opts$model <- 9
   } else if (opts$model == "multistate") {
-    opts$ model <- 1
+    opts$model <- 1
   } else if (opts$model == "discrete_ind") {
-    opts$ model <- 2
+    opts$model <- 2
   } else if (opts$model == "discrete_dep") {
-    opts$ model <- 3
-  } else if (model == "") {
+    opts$model <- 3
+  } else if (opts$model == "") {
     stop("No model specified!")
   } else {
     stop(paste("Model", opts$model, "not implemented in makeInfile. Please
@@ -134,6 +148,7 @@ makeInfile <- function(tree, data, species_col = NULL, analysis_name,
   if (opts$ancstates) {
     tags <- list()
     commands <- list()
+
     descnodes <- unique(tree$edge[, 1])
     for (i in seq_along(descnodes)) {
       tips <- getTipNames(tree, descnodes[i])
@@ -174,7 +189,7 @@ makeInfile <- function(tree, data, species_col = NULL, analysis_name,
     cat(paste0("burnin ", opts$burnin, "\n"))
     cat(paste0("iterations ", opts$iterations, "\n"))
     cat(paste0("sample ", opts$sample, "\n"))
-    cat(paste0("stones ", opts$stones, "\n"))
+    cat(paste0("stones ", opts$stones[1], " ", opts$stones[2], "\n"))
     if (opts$ancstates) {
       ilapply(tags, function(x) cat(paste0(x, "\n")))
       ilapply(commands, function(x) cat(paste0(x, "\n")))
@@ -203,7 +218,10 @@ makeInfile <- function(tree, data, species_col = NULL, analysis_name,
       cat("module unload compilers mpi\n")
       cat("module load r/recommended\n")
       cat(paste("cp", tfile, dfile, ifile, opts$bayestraits, "$TMPDIR\n"))
-      cat(paste(opts$bayestraits, tfile, dfile, "<", ifile, "> stdout\n"))
+      cat("cd $TMPDIR\n")
+      cat(paste0("./", opts$bayestraits, " ", tfile, " ", dfile, " ", "<", " ", 
+        ifile, "\n"))
+      cat(paste0("rm ", opts$bayestraits, "\n"))
       cat(
         paste0("tar zcvf ", job.opts$destination, "/", 
           analysis_name, "_$JOB_ID.tar.gz $TMPDIR\n")

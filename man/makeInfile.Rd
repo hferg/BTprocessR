@@ -12,7 +12,7 @@ BayesTraits analysis - for more complex analyses (e.g. alternate priors,
 parameter restriction, fixed scalars on nodes, fossilised states etc.) users 
 must write their own control files.}
 \usage{
-makeInfile(tree, data, species_col = NULL, analysis_name, analysis_path,
+makeInfile(tree, data, analysis_name, analysis_path, species_col = NULL,
   job = FALSE, bt.control = list(), job.control = list())
 }
 \arguments{
