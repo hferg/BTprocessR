@@ -144,10 +144,7 @@ createCountsTable <- function(reftree) {
         node = as.numeric(counts[i, "descNode"])
       )
       counts[i, "nTips"] <- sum(descs <= length(reftree$tip.label))
-      # if (counts[i, "nTips"] == 1) {
-      #   counts[i, "nTips"] <- 1
-      # }
-      if (counts[i, "descNode"] <= length(reftree$tip.label)) {
+      if (as.numeric(counts[i, "descNode"]) <= length(reftree$tip.label)) {
         counts[i, "species"] <- reftree$tip.label[descs]
       } else {
         tips <- descs[descs <= length(reftree$tip.label)]
@@ -192,7 +189,7 @@ scalarSearch <- function(rj_output, counts, fullmrcas, verbose) {
   names(Node) <- names(Branch) <- names(Delta) <- names(Lambda) <- 
     names(Kappa) <- names(Node_effects) <- counts[ , "descNode"]
 
-  print("Searching for scalars...")
+  cat("Searching for scalars...")
     if (verbose) {
       pb <- pbapply::startpb(0, nrow(rj_output))
     }
@@ -279,7 +276,7 @@ multiplyNodes <- function(scales, name, tree, Node_effects) {
 #' @export
 #' @name rjpp
 
-rjpp <- function(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
+rjpp <- function(logfile, rjlog, rjtrees, tree, burnin = 0, thinning = 1, 
    verbose = TRUE) {
   pbapply::pboptions(type = "timer", style = 3, char = "*")
 
@@ -290,40 +287,40 @@ rjpp <- function(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   }
 
   # Load the logfile
-  if (verbose) {
-    cat("Loading posterior logfile.\n")
-  }
-  log <- readLines(logfile)
+  # if (verbose) {
+  #   cat("Loading posterior logfile.\n")
+  # }
+  # log <- readLines(logfile)
 
-  if (length(grep("Tags", log)) > 0) {
-    if (length(grep("Local Rates", log)) > 0) {
-      if (verbose) {
-        cat("Local rates detected.\n")
-      }
+  # if (length(grep("Tags", log)) > 0) {
+  #   if (length(grep("Local Rates", log)) > 0) {
+  #     if (verbose) {
+  #       cat("Local rates detected.\n")
+  #     }
 
-      # get the tags, identify the node that the tags refer to.
-      ts <- grep("Tags", log)
-      te <- grep("Local Rates", log)
-      lre <- grep("Restrictions", log)
+  #     # get the tags, identify the node that the tags refer to.
+  #     ts <- grep("Tags", log)
+  #     te <- grep("Local Rates", log)
+  #     lre <- grep("Restrictions", log)
 
-      tags <- log[(ts + 1):(te - 1)]
-      trans <- log[(te + 1):(lre - 1)]
-      tagssp <- strsplit(tags, "\t")
-      tags <- vector(mode = "list", length = length(tagssp))
-      for (i in seq_along(tagssp)) {
-        tips <- strsplit(tagssp[[i]][4], " ")[[1]]
-        tags[[i]] <- list(
-          name = tagssp[[i]][2],
-          node = ape::getMRCA(tree, tips),
-          tips = tips) 
-      }
-      # identify the type(s) of local transformation.
+  #     tags <- log[(ts + 1):(te - 1)]
+  #     trans <- log[(te + 1):(lre - 1)]
+  #     tagssp <- strsplit(tags, "\t")
+  #     tags <- vector(mode = "list", length = length(tagssp))
+  #     for (i in seq_along(tagssp)) {
+  #       tips <- strsplit(tagssp[[i]][4], " ")[[1]]
+  #       tags[[i]] <- list(
+  #         name = tagssp[[i]][2],
+  #         node = ape::getMRCA(tree, tips),
+  #         tips = tips) 
+  #     }
+  #     # identify the type(s) of local transformation.
       
 
-      # get the estiamtes for that local transformation and store for later.
+  #     # get the estiamtes for that local transformation and store for later.
 
-    }
-  }
+  #   }
+  # }
 
   # Now look for tags.
   # If found, find the nodes that they are specific to.

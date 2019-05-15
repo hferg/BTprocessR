@@ -4,10 +4,13 @@
 \alias{rjpp}
 \title{rjpp}
 \usage{
-rjpp(logilfe, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
+rjpp(logfile, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
   verbose = TRUE)
 }
 \arguments{
+\item{logfile}{The posterior distribution of likelihoods and parameter
+estimates for the run (typically suffixed with .Log.txt)}
+
 \item{rjlog}{The RJ output of the run - typically suffixed with .VarRates.txt}
 
 \item{rjtrees}{}
@@ -20,9 +23,6 @@ from the other logfile)}
 
 \item{thinning}{Thinning parameter for the MCMC output - again, worked out 
 from the raw MCMC output logfile.}
-
-\item{logfile}{The posterior distribution of likelihoods and parameter
-estimates for the run (typically suffixed with .Log.txt)}
 }
 \description{
 A function that takes the output of a kappa, lambda, delta, VRates etc. RJ 

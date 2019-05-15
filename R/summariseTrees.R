@@ -36,7 +36,7 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1,
     trees <- trees
   } else {
     if (verbose) {
-      print("Reading posterior trees...")
+      cat("Reading posterior trees...")
     }
     trees <- ape::read.nexus(trees)
   }
@@ -45,7 +45,7 @@ summariseTrees <- function(reftree, trees, burnin = 0, thinning = 1,
 
   # ladderize trees.
   if (verbose) {
-    print("Ladderizing posterior trees:")
+    cat("Ladderizing posterior trees:")
     trees <- pbapply::pblapply(trees, ape::ladderize)
     class(trees) <- "multiPhylo"
   } else {
