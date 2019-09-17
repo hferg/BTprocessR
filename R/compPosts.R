@@ -41,7 +41,7 @@ compPosts <- function(logs, parameter, alpha = 0.7, ...) {
     ggplot2::geom_histogram(binwidth = bwidth, alpha = alpha) +
     viridis::scale_fill_viridis(discrete = TRUE) +
     ggplot2::theme_minimal(base_family = "Helvetica") +
-    labs(
+    ggplot2::labs(
       x = parameter,
       fill = "Logfile"
     )

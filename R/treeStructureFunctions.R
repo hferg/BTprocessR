@@ -152,7 +152,7 @@ getMRCAbtr <- function(x, tree, rjtaxa) {
 #' Make species key from a tree.
 #' @param tree An object of class "phylo"
 #' @name makeKey
-#' @keyword internal
+#' @keywords internal
 
 makeKey <- function(tree) {
   tb <- matrix(ncol = 2, nrow = (nrow(tree$edge) + 1))

@@ -37,7 +37,7 @@ getStones <- function(stones, labels = NULL) {
     res$logfile <- labels
   }
   res$marginalLh <- as.numeric(as.character(res$marginalLh))
-  res <- as_tibble(res)
+  res <- tibble::as_tibble(res)
   class(res) <- append("bt_stones", class(res))
   return(res)
 }

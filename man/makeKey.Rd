@@ -12,3 +12,4 @@ makeKey(tree)
 \description{
 Make species key from a tree.
 }
+\keyword{internal}

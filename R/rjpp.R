@@ -128,7 +128,7 @@ createCountsTable <- function(reftree) {
     hts <- round(abs(hts - max(hts)), 4)
     counts[ , "start"] <- c(0, hts[ , 1])
     counts[ , "end"] <- c(0, hts[ , 2])
-    counts <- as.data.frame(counts)
+    counts <- as.data.frame(counts, stringsAsFactors = FALSE)
 
     # Deal with the root
     counts[1, 1] <- "root"
