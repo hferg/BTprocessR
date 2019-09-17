@@ -62,7 +62,7 @@ print.bt_post <- function(x) {
   st[ , 4] <- round(apply(x[, params], 2, modeStat), 3)
   st[ , 5] <- round(apply(x[, params], 2, sd), 3)
   cat("Posterior of ", nrow(x), " samples\n\n")
-  print(data.frame(st))
+  print(data.frame(st, stringsAsFactors = FALSE))
   cat("\n")
   print(z)
 }

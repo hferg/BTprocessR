@@ -29,7 +29,7 @@ getPostStats <- function(logfile, parameter, ...) {
   d <- posterior[ , colnames(posterior) %in% parameter]
   res <- matrix(ncol = 5, nrow = length(parameter))
   colnames(res) <- c("parameter", "mean", "median", "mode", "sd")
-  res <- data.frame(res)
+  res <- data.frame(res, stringsAsFactors = FALSE)
   for (i in seq_along(parameter)) {
     res[i, 1] <- parameter[i]
     res[i, 2] <- round(mean(d[parameter[i]][[1]]), 4)

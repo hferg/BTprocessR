@@ -32,7 +32,7 @@ getStones <- function(stones, labels = NULL) {
     res[i, 1] <- stones[[i]]
     res[i, 2] <- as.numeric(strsplit(raw[length(raw)], "\t")[[1]][2])
   }
-  res <- data.frame(res)
+  res <- data.frame(res, stringsAsFactors = FALSE)
   if (!is.null(labels)) {
     res$logfile <- labels
   }

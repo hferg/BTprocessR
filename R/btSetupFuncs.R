@@ -53,7 +53,7 @@ makeInfile <- function(tree, data, analysis_name, analysis_path,
   }
 
   if (class(data) == "matrix") {
-    data <- as.data.frame(data)
+    data <- as.data.frame(data, stringsAsFactors = FALSE)
   }
 
   # create the directory to put the analysis files in, if needed.

@@ -254,7 +254,7 @@ sharedBranches <- function(tree1, tree2) {
       shared_table[i, "sml_descNode"] <- NA
     }
   }
-  shared_table <- as.data.frame(shared_table)
+  shared_table <- as.data.frame(shared_table, stringsAsFactors = FALSE)
   shared$shared <- as.logical(shared)
   return(tibble::as_tibble(shared_table))
 }

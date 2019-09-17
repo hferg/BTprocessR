@@ -379,7 +379,8 @@ rjpp <- function(logfile, rjlog, rjtrees, tree, burnin = 0, thinning = 1,
     )
   }
   
-  fullmrcas <- data.frame(node = subtrees$node, mrca = fullmrcas) 
+  fullmrcas <- data.frame(node = subtrees$node, mrca = fullmrcas, 
+    stringsAsFactors = FALSE) 
   x <- createCountsTable(reftree)
   counts <- x$counts
   species_key <- x$species_key
