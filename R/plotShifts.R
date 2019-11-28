@@ -253,11 +253,13 @@ legendInfo <- function(tree, opts, cols) {
   } else {
     leg <- round(cols$scale.lims, 2)
   }
-  if (opts$legend.pos == "auto") {
-    pos <- c(0, 
-      0, 
-      round((max(ape::node.depth.edgelength(tree)) / 4), 2),
-      round((length(tree$tip.label) / 60), 2))
+  if (length(opts$legend.pos) == 1) {
+    if (opts$legend.pos == "auto") {
+			pos <- c(0, 
+      	0, 
+      	round((max(ape::node.depth.edgelength(tree)) / 4), 2),
+      	round((length(tree$tip.label) / 60), 2))
+		}
   } else {
     pos <- opts$legend.pos
   }
@@ -405,7 +407,7 @@ scaleTree <- function(PP, opts) {
 #' if a branch symbol receives no scaling, this is what it's scaling factor will
 #' be.}
 #' \item{na.colour:}{ []}
-#' \item{layou:}{ [c("e", "n", "b")] This controls the layout of the plots. The
+#' \item{layout:}{ [c("e", "n", "b")] This controls the layout of the plots. The
 #' option takes the form of a vector of letters - "e", "n" and/or "b". Each 
 #' element of the vector is a new panel in the plot, and the composition of
 #' letters in the element determins whether coloured edges - "e" - node labels -
@@ -418,7 +420,7 @@ scaleTree <- function(PP, opts) {
 #' plot. If "auto" then the legend position will be in the bottom right at 
 #' "best guess" coordinates. Otherwise a vector of coordinates for bottom left
 #' and top right corner of the legend.}
-#' \item{ledend:}{ []}
+#' \item{legend:}{ []}
 #' }
 #' 
 #' @name plotShifts

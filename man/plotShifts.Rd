@@ -91,7 +91,7 @@ scaling factor that the symbols start at before any subsequent scaling (i.e.
 if a branch symbol receives no scaling, this is what it's scaling factor will
 be.}
 \item{na.colour:}{ []}
-\item{layou:}{ [c("e", "n", "b")] This controls the layout of the plots. The
+\item{layout:}{ [c("e", "n", "b")] This controls the layout of the plots. The
 option takes the form of a vector of letters - "e", "n" and/or "b". Each 
 element of the vector is a new panel in the plot, and the composition of
 letters in the element determins whether coloured edges - "e" - node labels -
@@ -104,6 +104,6 @@ plot with edges, node labels and branch labels.}
 plot. If "auto" then the legend position will be in the bottom right at 
 "best guess" coordinates. Otherwise a vector of coordinates for bottom left
 and top right corner of the legend.}
-\item{ledend:}{ []}
+\item{legend:}{ []}
 }
 }

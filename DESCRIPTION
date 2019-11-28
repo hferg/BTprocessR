@@ -19,5 +19,6 @@ Imports:
   pbapply,
   phytools,
   ggplot2,
-  colourvalues
+  colourvalues,
+	Hmisc
 RoxygenNote: 6.1.1
