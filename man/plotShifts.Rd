@@ -100,10 +100,23 @@ three panel plot - one panel with coloured edges, one with node labels and
 one with branch labels. c("en", "b") produces two plots - one with coloured
 edges and node labels and one with branch labels. c("enb") produces a single
 plot with edges, node labels and branch labels.}
+\item{show.legend:}{ [TRUE, FALSE] Whether or not to show legends. Legends 
+can be drawn seperately using the plotLegends function and then added to
+plots using some other graphics software. This is useful if the legend butts
+up against the lower branches of scaled phylogenies, if the type = "fan"
+option is used (the automatic legend placement puts it in a weird place) or
+if a more complex legend is needed (e.g. a histogram).}
 \item{legend.pos:}{ [auto, c(xl, yb, xr, yt)] The legend position on the 
 plot. If "auto" then the legend position will be in the bottom right at 
 "best guess" coordinates. Otherwise a vector of coordinates for bottom left
 and top right corner of the legend.}
 \item{legend:}{ []}
+\item{save.plot:}{ [TRUE, FALSE] If TRUE then the plot will be saved to the 
+working directory as a pdf and NOT plotted to the screen.}
+\item{filename:}{ [<some_filename>] The filename to save the plot to. If not
+specified then a filename will be generated based on the time and date. 
+There's no need to specify file extension.}
+\item{plot.size:}{ [c(<width>, <height>)] The width and height of the saved
+plot. If plot.format = "png" then the unit is in pixels.}
 }
 }

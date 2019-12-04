@@ -416,14 +416,24 @@ scaleTree <- function(PP, opts) {
 #' one with branch labels. c("en", "b") produces two plots - one with coloured
 #' edges and node labels and one with branch labels. c("enb") produces a single
 #' plot with edges, node labels and branch labels.}
-#' \item{show.legend:}{[TRUE, FALSE]} Whether or not to show legends. Legends 
+#' \item{show.legend:}{ [TRUE, FALSE] Whether or not to show legends. Legends 
 #' can be drawn seperately using the plotLegends function and then added to
-#' plots using some other graphics software.
+#' plots using some other graphics software. This is useful if the legend butts
+#' up against the lower branches of scaled phylogenies, if the type = "fan"
+#' option is used (the automatic legend placement puts it in a weird place) or
+#' if a more complex legend is needed (e.g. a histogram).}
 #' \item{legend.pos:}{ [auto, c(xl, yb, xr, yt)] The legend position on the 
 #' plot. If "auto" then the legend position will be in the bottom right at 
 #' "best guess" coordinates. Otherwise a vector of coordinates for bottom left
 #' and top right corner of the legend.}
 #' \item{legend:}{ []}
+#' \item{save.plot:}{ [TRUE, FALSE] If TRUE then the plot will be saved to the 
+#' working directory as a pdf and NOT plotted to the screen.}
+#' \item{filename:}{ [<some_filename>] The filename to save the plot to. If not
+#' specified then a filename will be generated based on the time and date. 
+#' There's no need to specify file extension.}
+#' \item{plot.size:}{ [c(<width>, <height>)] The width and height of the saved
+#' plot. If plot.format = "png" then the unit is in pixels.}
 #' }
 #' 
 #' @name plotShifts
@@ -471,7 +481,10 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     layout = c("e", "n", "b"),
     show.legend = TRUE,
     legend.pos = "auto",
-    legend = "numeric"
+    legend = "numeric",
+    save.plot = FALSE,
+    filename = NULL,
+    plot.size = NULL
   )
   opts[names(plot.options)] <- plot.options
 
@@ -497,34 +510,42 @@ plotShifts <- function(PP, plot.options = list(), ...) {
       edge.cols <- branchColours(PP, opts)
     }
     node.shapes <- plotShapes(PP, opts, mode = "nodes")
-    # Default to a layout of "en" rather than c("e", "n", "b") - unless the
-    # user has specified a layout.
-    if (!"layout" %in% names(plot.options)) {
-      if (opts$edge.colour != "none") {
-        opts$layout <- "en"
-      } else {
-        opts$layout <- "n"
-      }
-    }
   }
 
   tree <- scaleTree(PP, opts)
   leg.tit <- makeLegendTitle(opts)
   panels <- strsplit(opts$layout, "")
-  par(mfrow = c(1, length(panels)))
-
+  
+  if (opts$save.plot) {
+    if (is.null(opts$filename)) {
+      filename <- paste0("BTprocessR_plot_", 
+        paste0(strsplit(date(), " ")[[1]], collapse = "_"), ".pdf")
+    } else {
+      filename <- paste0(opts$filename, ".pdf")
+    }
+    if (is.null(opts$plot.size)) {
+      opts$plot.size <- c(width = 10 * length(panels), height = 10)
+    }
+    pdf(filename, width = opts$plot.size[1], height = opts$plot.size[2])
+    par(mfrow = c(1, length(panels)))
+  } else {
+    par(mfrow = c(1, length(panels)))
+  }
+  
   for (i in seq_along(panels)) {
     content <- panels[[i]]
     legends <- list()
     if ("e" %in% content) {
-      plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
+      #plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
+      plotPhylo(tree, edge.col = edge.cols$edge.cols)
       content <- content[!content == "e"]
       legends <- append(legends, 
         list(c(legendInfo(tree, opts, edge.cols), label = "Edges:",
           title = leg.tit$edge_leg))
       )
     } else {
-      plotPhylo(tree, ...)
+      #plotPhylo(tree, ...)
+      plotPhylo(tree)
     }
     for (j in seq_along(content)) {
       if (content[j] == "n") {
@@ -574,6 +595,10 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     }
   }
 
-  # reset the pane layout
-  par(mfrow = c(1,1))
+  # reset the pane layout and close devices, if saving.
+  if (opts$save.plot) {
+    dev.off()
+  } else {
+    par(mfrow = c(1,1))  
+  }
 }
