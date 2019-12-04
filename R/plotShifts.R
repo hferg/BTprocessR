@@ -511,14 +511,14 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     content <- panels[[i]]
     legends <- list()
     if ("e" %in% content) {
-      plotPhylo(tree, edge.col = edge.cols$edge.cols)
+      plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
       content <- content[!content == "e"]
       legends <- append(legends, 
         list(c(legendInfo(tree, opts, edge.cols), label = "Edges:",
           title = leg.tit$edge_leg))
       )
     } else {
-      plotPhylo(tree)
+      plotPhylo(tree, ...)
     }
     for (j in seq_along(content)) {
       if (content[j] == "n") {
