@@ -253,11 +253,13 @@ legendInfo <- function(tree, opts, cols) {
   } else {
     leg <- round(cols$scale.lims, 2)
   }
-  if (opts$legend.pos == "auto") {
-    pos <- c(0, 
-      0, 
-      round((max(ape::node.depth.edgelength(tree)) / 4), 2),
-      round((length(tree$tip.label) / 60), 2))
+  if (length(opts$legend.pos) == 1) {
+    if (opts$legend.pos == "auto") {
+			pos <- c(0, 
+      	0, 
+      	round((max(ape::node.depth.edgelength(tree)) / 4), 2),
+      	round((length(tree$tip.label) / 60), 2))
+		}
   } else {
     pos <- opts$legend.pos
   }
