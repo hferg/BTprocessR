@@ -405,7 +405,7 @@ scaleTree <- function(PP, opts) {
 #' if a branch symbol receives no scaling, this is what it's scaling factor will
 #' be.}
 #' \item{na.colour:}{ []}
-#' \item{layou:}{ [c("e", "n", "b")] This controls the layout of the plots. The
+#' \item{layout:}{ [c("e", "n", "b")] This controls the layout of the plots. The
 #' option takes the form of a vector of letters - "e", "n" and/or "b". Each 
 #' element of the vector is a new panel in the plot, and the composition of
 #' letters in the element determins whether coloured edges - "e" - node labels -
@@ -414,11 +414,14 @@ scaleTree <- function(PP, opts) {
 #' one with branch labels. c("en", "b") produces two plots - one with coloured
 #' edges and node labels and one with branch labels. c("enb") produces a single
 #' plot with edges, node labels and branch labels.}
+#' \item{show.legend:}{[TRUE, FALSE]} Whether or not to show legends. Legends 
+#' can be drawn seperately using the plotLegends function and then added to
+#' plots using some other graphics software.
 #' \item{legend.pos:}{ [auto, c(xl, yb, xr, yt)] The legend position on the 
 #' plot. If "auto" then the legend position will be in the bottom right at 
 #' "best guess" coordinates. Otherwise a vector of coordinates for bottom left
 #' and top right corner of the legend.}
-#' \item{ledend:}{ []}
+#' \item{legend:}{ []}
 #' }
 #' 
 #' @name plotShifts
@@ -464,6 +467,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     branch.cex = 2,
     na.colour = "black",
     layout = c("e", "n", "b"),
+    show.legend = TRUE,
     legend.pos = "auto",
     legend = "numeric"
   )
@@ -476,7 +480,7 @@ plotShifts <- function(PP, plot.options = list(), ...) {
   opts <- lapply(opts, function(x) gsub("uptriangle", 24, x))
   opts <- lapply(opts, function(x) gsub("downtriangle", 25, x))
 
-  if (length(opts$transformation) >1 ) {
+  if (length(opts$transformation) > 1) {
     message("Multiple transformations detected. Please select one to plot:")
     opts$transformation <- select.list(choices = opts$transformation)
   }
@@ -543,25 +547,27 @@ plotShifts <- function(PP, plot.options = list(), ...) {
         )
       }
     }
-    legends <- rev(legends)
 
-    for (j in seq_along(legends)) {
-      leg <- legends[[j]]
-      if (j > 1) {
-        leg$pos[2] <- prev + (strheight("H") * 2)
-        leg$pos[4] <- leg$pos[2] + legends[[1]]$pos[4]
-        prev <- leg$pos[4]
-      } else {
-        prev <- leg$pos[4]
-      }
-      plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4],
-        leg$legend, rect.col = leg$cols, align = "rb")
-      labx <- (leg$pos[1] + leg$pos[3]) / 2
-      laby <- leg$pos[4] + strheight("H")
-      if (length(legends) == 1) {
-        text(labx, laby, leg$title)
-      } else {
-        text(labx, laby, paste0(leg$label, leg$title))
+    legends <- rev(legends)
+    if (opts$show.legend) {
+      for (j in seq_along(legends)) {
+        leg <- legends[[j]]
+        if (j > 1) {
+          leg$pos[2] <- prev + (strheight("H") * 2)
+          leg$pos[4] <- leg$pos[2] + legends[[1]]$pos[4]
+          prev <- leg$pos[4]
+        } else {
+          prev <- leg$pos[4]
+        }
+        plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4],
+          leg$legend, rect.col = leg$cols, align = "rb")
+        labx <- (leg$pos[1] + leg$pos[3]) / 2
+        laby <- leg$pos[4] + strheight("H")
+        if (length(legends) == 1) {
+          text(labx, laby, leg$title)
+        } else {
+          text(labx, laby, paste0(leg$label, leg$title))
+        }
       }
     }
   }
