@@ -118,5 +118,12 @@ specified then a filename will be generated based on the time and date.
 There's no need to specify file extension.}
 \item{plot.size:}{ [c(<width>, <height>)] The width and height of the saved
 plot. If plot.format = "png" then the unit is in pixels.}
+\item{legend.only}{ [TRUE, FALSE] When TRUE only the legend(s) corresponding 
+to all the other options are plotted. When this option is called two legends
+are plotted per plot - the one that normally appears on the plot, and one 
+accompanied by a histogram showing the same data used to generate the 
+colours. This option is useful for when the legend is to be combined with the
+plot in seperate graphical software (e.g. GIMP, Inkscape). This option is 
+compatible with save.plot.}
 }
 }

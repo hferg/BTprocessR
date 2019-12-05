@@ -434,6 +434,13 @@ scaleTree <- function(PP, opts) {
 #' There's no need to specify file extension.}
 #' \item{plot.size:}{ [c(<width>, <height>)] The width and height of the saved
 #' plot. If plot.format = "png" then the unit is in pixels.}
+#' \item{legend.only}{ [TRUE, FALSE] When TRUE only the legend(s) corresponding 
+#' to all the other options are plotted. When this option is called two legends
+#' are plotted per plot - the one that normally appears on the plot, and one 
+#' accompanied by a histogram showing the same data used to generate the 
+#' colours. This option is useful for when the legend is to be combined with the
+#' plot in seperate graphical software (e.g. GIMP, Inkscape). This option is 
+#' compatible with save.plot.}
 #' }
 #' 
 #' @name plotShifts
@@ -444,7 +451,6 @@ plotShifts <- function(PP, plot.options = list(), ...) {
 
   # TODO - check the cex values for nodes/branches - seem to be messed up.
   # TODO - include option to plot node labels for specified node(s).
-  # TODO - change scale bar and legend position for fan phylogenies.
 
   transformation <- names(PP$origins)
   if ("nodes" %in% transformation) {
@@ -484,17 +490,35 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     legend = "numeric",
     save.plot = FALSE,
     filename = NULL,
-    plot.size = NULL
+    plot.size = NULL,
+    legend.only = FALSE
   )
   opts[names(plot.options)] <- plot.options
 
-  # set pch for the node and branch labels.
   opts <- lapply(opts, function(x) gsub("circle", 21, x))
   opts <- lapply(opts, function(x) gsub("square", 22, x))
   opts <- lapply(opts, function(x) gsub("diamond", 23, x))
   opts <- lapply(opts, function(x) gsub("uptriangle", 24, x))
   opts <- lapply(opts, function(x) gsub("downtriangle", 25, x))
+  
+  # apply converts to matrix so reset logical and NULLS, where needed.
+  opts$show.legend <- as.logical(opts$show.legend)
+  opts$save.plot <- as.logical(opts$save.plot)
+  opts$legend.only <- as.logical(opts$legend.only)
+  if (length(opts$filename) == 0) {
+    opts[names(opts) == "filename"] <- list(NULL)
+  }
+  if (length(opts$plot.size) == 0) {
+    opts[names(opts) == "plot.size"] <- list(NULL)
+  }
 
+  # change layout if legend.only.
+  if (opts$legend.only) {
+    opts$layout <- paste0(
+      unique(strsplit(paste0(opts$layout, collapse = ""), "")[[1]]),
+      collapse = ""
+    )
+  }
   if (length(opts$transformation) > 1) {
     message("Multiple transformations detected. Please select one to plot:")
     opts$transformation <- select.list(choices = opts$transformation)
@@ -536,34 +560,42 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     content <- panels[[i]]
     legends <- list()
     if ("e" %in% content) {
-      #plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
-      plotPhylo(tree, edge.col = edge.cols$edge.cols)
+      if (!opts$legend.only) {
+        #plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
+        plotPhylo(tree, edge.col = edge.cols$edge.cols)
+      }
       content <- content[!content == "e"]
       legends <- append(legends, 
         list(c(legendInfo(tree, opts, edge.cols), label = "Edges:",
           title = leg.tit$edge_leg))
       )
     } else {
-      #plotPhylo(tree, ...)
-      plotPhylo(tree)
+      if (!opts$legend.only) {
+        #plotPhylo(tree, ...)
+        plotPhylo(tree)
+      }
     }
     for (j in seq_along(content)) {
       if (content[j] == "n") {
-        ape::nodelabels(node = node.shapes$nodes, 
-          bg = node.shapes$colours,
-          col = opts$node.border,
-          cex = node.shapes$nodecex, 
-          pch = as.numeric(opts$node.shape))
+        if (!opts$legend.only) {
+          ape::nodelabels(node = node.shapes$nodes, 
+            bg = node.shapes$colours,
+            col = opts$node.border,
+            cex = node.shapes$nodecex, 
+            pch = as.numeric(opts$node.shape))
+        }        
         legends <- append(legends,
           list(c(legendInfo(tree, opts, node.shapes), label = "Nodes: ",
             title = leg.tit$node_leg))
         ) 
       } else if (content[j] == "b") {
-        ape::edgelabels(edge = branch.shapes$nodes, 
-          bg = branch.shapes$colours,
-          col = opts$branch.border, 
-          cex = branch.shapes$nodecex, 
-          pch = as.numeric(opts$branch.shape))
+        if (!opts$legend.only) {
+          ape::edgelabels(edge = branch.shapes$nodes, 
+            bg = branch.shapes$colours,
+            col = opts$branch.border, 
+            cex = branch.shapes$nodecex, 
+            pch = as.numeric(opts$branch.shape))
+        }          
         legends <- append(legends, 
           list(c(legendInfo(tree, opts, branch.shapes), label = "Branches: ",
             title = leg.tit$branch_leg))
@@ -573,25 +605,44 @@ plotShifts <- function(PP, plot.options = list(), ...) {
 
     legends <- rev(legends)
     if (opts$show.legend) {
+      if (opts$legend.only) {
+        #par(mfrow = c(1, 2))
+        plot.new()
+        offset <- 0.1
+        m <- 5
+        lcex <- 1
+      } else {
+        offset <- legends[[1]]$pos[4]
+        m <- 2
+        lcex <- 0.7
+      }
       for (j in seq_along(legends)) {
         leg <- legends[[j]]
+        if (opts$legend.only) {
+          leg$pos[3] <- 1
+          leg$pos[4] <- 0.1
+        }
         if (j > 1) {
-          leg$pos[2] <- prev + (strheight("H") * 2)
-          leg$pos[4] <- leg$pos[2] + legends[[1]]$pos[4]
+          leg$pos[2] <- prev + (strheight("H", cex = 2) * m)
+          leg$pos[4] <- leg$pos[2] + offset
           prev <- leg$pos[4]
         } else {
           prev <- leg$pos[4]
         }
         plotrix::color.legend(leg$pos[1], leg$pos[2], leg$pos[3], leg$pos[4],
-          leg$legend, rect.col = leg$cols, align = "rb")
+          leg$legend, rect.col = leg$cols, align = "rb", cex = lcex)
         labx <- (leg$pos[1] + leg$pos[3]) / 2
         laby <- leg$pos[4] + strheight("H")
         if (length(legends) == 1) {
-          text(labx, laby, leg$title)
+          text(labx, laby, leg$title, cex = 1.428571)
         } else {
-          text(labx, laby, paste0(leg$label, leg$title))
+          text(labx, laby, paste0(leg$label, leg$title), cex = 1.428571)
         }
       }
+      # if (opts$legend.only) {
+      #   plot.new()
+      #   # do the histograms here...
+      # }
     }
   }
 
