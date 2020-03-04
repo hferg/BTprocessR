@@ -561,8 +561,8 @@ plotShifts <- function(PP, plot.options = list(), ...) {
     legends <- list()
     if ("e" %in% content) {
       if (!opts$legend.only) {
-        #plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
-        plotPhylo(tree, edge.col = edge.cols$edge.cols)
+        plotPhylo(tree, edge.col = edge.cols$edge.cols, ...)
+        #plotPhylo(tree, edge.col = edge.cols$edge.cols)
       }
       content <- content[!content == "e"]
       legends <- append(legends, 
@@ -571,8 +571,8 @@ plotShifts <- function(PP, plot.options = list(), ...) {
       )
     } else {
       if (!opts$legend.only) {
-        #plotPhylo(tree, ...)
-        plotPhylo(tree)
+        plotPhylo(tree, ...)
+        #plotPhylo(tree)
       }
     }
     for (j in seq_along(content)) {

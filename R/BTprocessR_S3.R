@@ -73,7 +73,7 @@ print.bt_post <- function(x) {
 #' @export
 
 plot.bt_post <- function(x, ...) {
-  autoplot(x, ...)
+  ggplot2::autoplot(x, ...)
 }
 
 #' Print function for the S3 class trees_summary
@@ -155,7 +155,7 @@ autoplot.bt_stones <- function(x) {
 #' @name plot.bt_stones
 
 plot.bt_stones <- function(x) {
-  autoplot(x)
+  ggplot2::autoplot(x)
 }
 
 #' A print method for the class "spkey"
